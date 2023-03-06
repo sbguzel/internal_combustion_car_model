@@ -306,10 +306,10 @@ u = 0.02; % 70C SAE 30
 l = 5.2e-5; %m
 r = 0.05; %m
 L = 0.05; %m
-friction = ((T(u,l,r,L)) * 9 + 4 * 0.05) * 1.5;
+damping = ((T(u,l,r,L)) * 9 + 4 * 0.05) * 1.5;
 inertia = (0.04 + 0.0515 + 0.00125 * 4 + 0.0079 * 4) * 1.5;
 dt = 0.0001;
-c2d(tf(1, [inertia friction 0]), dt)
+c2d(tf(1, [inertia damping 0]), dt)
 '''
         rendered_code = Code(code=code, language="matlab", line_spacing=0.5, font="Monospace", stroke_width=1).scale(0.9).move_to(1.5 * DOWN)
         self.play(FadeIn(rendered_code))
