@@ -6,15 +6,15 @@ public class Crankshaft_ss
     public double k = 0;
     double[,] dt = new double[1, 1];
     // State-Space Matrices
-    double[,] A = new double[2, 2];
-    double[,] B = new double[2, 1];
-    double[,] C = new double[1, 2];
-    double[,] D = new double[1, 1];
+    double[,] A;
+    double[,] B;
+    double[,] C;
+    double[,] D;
     // State Matrices
     double[,] x_dot = new double[2, 1] { { 0 }, { 0 } };
     double[,] x = new double[2, 1] { { 0 }, { 0 } };
     // Input
-    public double[,] torque = new double[1, 1];
+    public double[,] torque = new double[1, 1] { { 0 } };
     // Output
     public double theta = 0;
     public double theta_dot = 0;
@@ -97,22 +97,13 @@ public class Crankshaft_dtf
     const double c = 0.32236;
     const double dt = 0.0001;
     // Input
-    public double[] torque = new double[3];
+    public double[] torque = new double[] { 0, 0, 0 };
     // Output
-    public double[] theta = new double[3];
-    public double theta_dot;
-    public double theta_ddot;
+    public double[] theta = new double[] { 0, 0, 0 };
+    public double theta_dot = 0;
+    public double theta_ddot = 0;
 
-    public Crankshaft_dtf()
-    {
-        theta[0] = 0;
-        theta[1] = 0;
-        theta[2] = 0;
-        torque[0] = 0;
-        torque[1] = 0;
-        torque[2] = 0;
-        theta_dot = 0;
-    }
+    public Crankshaft_dtf(){}
 
     public void Dynamics()
     {

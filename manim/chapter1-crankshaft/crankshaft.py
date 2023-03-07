@@ -4,6 +4,16 @@ from manim import *
 class Crankshaft(Scene):
 
     def construct(self):
+        # Chapter 1
+        chapterNumber = Tex("CHAPTER I").scale(3)
+        chapterText = Tex("crankshaft dynamic system model").scale(1)
+        chapter = VGroup(chapterNumber, chapterText).arrange(3 * DOWN)
+        self.play(FadeIn(chapter[0]))
+        self.play(FadeIn(chapter[1]))
+        self.wait()
+        self.play(FadeOut(chapter))
+        self.wait()
+
         # Create Crankshaft BlackBox
         crankshaftBox = Rectangle(width=4, height=2).set_stroke(color=WHITE, width=2)
         crankshaftText = Text("Crankshaft")
@@ -716,72 +726,108 @@ class Crankshaft(Scene):
         self.play(finalSSNotes.animate.scale(0.98).move_to(finalSSNotes.get_center() + 1.4 * UP))
         self.wait()
 
+        DTFcsExample = Text("Discrete TF C# Example").scale(0.85)
+        self.play(FadeIn(DTFcsExample))
+        self.play(Circumscribe(angleEquationGroup, buff = 0))
+        self.play(FadeOut(DTFcsExample))
+
         # CS Example
+        DTFvariables1 = Text('const double I = 0.2446;', font="Monospace")
+        DTFvariables2 = Text('const double dt = 0.0001;', font="Monospace") 
+        DTFvariables3 = Text('public double[] torque = new double[] { 0, 0, 0 };', font="Monospace")
+        DTFvariables4 = Text('public double[] theta = new double[] { 0, 0, 0 };', font="Monospace")
+        DTFvariables5 = Text('theta_dot = 0;', font="Monospace")
+        DTFvariables6 = Text('theta_ddot = 0;', font="Monospace")
 
         DTFbrace1 = Text('{', font="Monospace")
         DTFAngle1 = Text('angle[0] = (1.999832249154917) * angle[1] -', font="Monospace")
-        DTFAngle2 = Text('.          (0.999832249154917) * angle[2];', font="Monospace")
+        DTFAngle2 = Text('.          (0.999832249154917) * angle[2] +', font="Monospace")
         DTFAngle3 = Text('.          (2.601988240193600e-08) * torque[1] +', font="Monospace")
-        DTFAngle4 = Text('.          (2.601842736815161e-08) * torque[2] +', font="Monospace")
-        
-        DTFAngleGroup = VGroup(DTFAngle1,
-                               DTFAngle2,
-                               DTFAngle3,
-                               DTFAngle4).arrange(DOWN, center=False, aligned_edge=LEFT)
+        DTFAngle4 = Text('.          (2.601842736815161e-08) * torque[2];', font="Monospace")
         DTFAngularVelocity = Text('angularVelocity = (angle[0] - angle[1]) / dt;', font="Monospace")
         DTFAngularAcceleration = Text('angularAcceleration = torque[0] / inertia;', font="Monospace")
         DTFLast1 = Text('torque[2] = torque[1];', font="Monospace")
         DTFLast2 = Text('torque[1] = torque[0];', font="Monospace")
         DTFLast3 = Text('angle[2] = angle[1];', font="Monospace")
         DTFLast4 = Text('angle[1] = angle[0];', font="Monospace")
-        DFTLastGroup = VGroup(DTFLast1,
-                              DTFLast2,
-                              DTFLast3,
-                              DTFLast4).arrange(DOWN, center=False, aligned_edge=LEFT)
         DTFbrace2 = Text('}', font="Monospace")
 
-        DTFCode = VGroup(DTFbrace1, DTFAngleGroup, DTFAngularVelocity, DTFAngularAcceleration, DFTLastGroup, DTFbrace2).arrange(DOWN, center=False, aligned_edge=LEFT).scale(0.5).next_to(finalSSNotes, DOWN)
+        DTFCode = VGroup(DTFvariables1,
+                         DTFvariables2,
+                         DTFvariables3,
+                         DTFvariables4,
+                         DTFvariables5,
+                         DTFvariables6,
+                         DTFbrace1,
+                         DTFAngle1,
+                         DTFAngle2,
+                         DTFAngle3,
+                         DTFAngle4,
+                         DTFAngularVelocity,
+                         DTFAngularAcceleration,
+                         DTFLast1,
+                         DTFLast2,
+                         DTFLast3,
+                         DTFLast4,
+                         DTFbrace2).arrange(DOWN, center=False, aligned_edge=LEFT).scale(0.5).next_to(finalSSNotes, DOWN)
+        
         DTFbrace1.move_to(DTFbrace1.get_center() + 0.5 * LEFT)
         DTFbrace2.move_to(DTFbrace2.get_center() + 0.5 * LEFT)
-           
+
         for i in range(len(DTFCode)):
-            if(i == 1 or i == 4):
-                for j in range(4):
-                    if(i == 1):
-                        self.play(Indicate(VGroup(angleEquationGroup[0][1 + (j*2)], angleEquationGroup[0][2 + (j*2)])))
-                    self.play(FadeIn(DTFCode[i][j]))
+            if(i < 11 and i > 6):
+                self.play(Indicate(VGroup(angleEquationGroup[0][1 + ((i-7)*2)], angleEquationGroup[0][2 + ((i-7)*2)])))
+            if(i > 11):
+                self.remove(DTFCode[i-12])
+                DTFCode.move_to(DTFCode.get_center() + 0.4 * UP)
+                self.play(FadeIn(DTFCode[i]))
             else:
                 self.play(FadeIn(DTFCode[i]))
         
-        self.play(FadeOut(DTFCode))
+        self.play(FadeOut(DTFCode[6]),
+                  FadeOut(DTFCode[7]),
+                  FadeOut(DTFCode[8]),
+                  FadeOut(DTFCode[9]),
+                  FadeOut(DTFCode[10]),
+                  FadeOut(DTFCode[11]),
+                  FadeOut(DTFCode[12]),
+                  FadeOut(DTFCode[13]),
+                  FadeOut(DTFCode[14]),
+                  FadeOut(DTFCode[15]),
+                  FadeOut(DTFCode[16]),
+                  FadeOut(DTFCode[17]),)
 
-        SSbrace1 = Text('{')
+        SScsExample = Text("State Space C# Example").scale(0.85)
+        self.play(FadeIn(SScsExample))
+        self.play(Circumscribe(stateSpaceTexGroup, buff = 0))
+        self.play(FadeOut(SScsExample))
+
         SSvariables1 = Text('public double I;', font="Monospace")
         SSvariables2 = Text('public double c;', font="Monospace")
         SSvariables3 = Text('public double k = 0;', font="Monospace")
         SSvariables4 = Text('double[,] dt = new double[1, 1];', font="Monospace")
-        SSvariables5 = Text('double[,] A = new double[2, 2];', font="Monospace")
-        SSvariables6 = Text('double[,] B = new double[2, 1];', font="Monospace")
-        SSvariables7 = Text('double[,] C = new double[1, 2];', font="Monospace")
-        SSvariables8 = Text('double[,] D = new double[1, 1];', font="Monospace")
+        SSvariables5 = Text('double[,] A;', font="Monospace")
+        SSvariables6 = Text('double[,] B;', font="Monospace")
+        SSvariables7 = Text('double[,] C;', font="Monospace")
+        SSvariables8 = Text('double[,] D;', font="Monospace")
         SSvariables9 = Text('double[,] x_dot = new double[2, 1] { { 0 }, { 0 } };', font="Monospace")
         SSvariables10 = Text('double[,] x = new double[2, 1] { { 0 }, { 0 } };', font="Monospace")
-        SSvariables11 = Text('public double[,] T = new double[1, 1];', font="Monospace")
-
+        SSvariables11 = Text('public double[,] torque = new double[1, 1];', font="Monospace")
+        
+        SSbrace1 = Text('{')
         SSvariables12 = Text('A = new double[,] { { 0, 1 }, { (-k / I), (-c / I) } };', font="Monospace")
         SSvariables13 = Text('B = new double[,] { { 0 }, { (1 / I) } };', font="Monospace")
         SSvariables14 = Text('C = new double[,] { { 1, 0 } };', font="Monospace")
         SSvariables15 = Text('D = new double[,] { { 0 } };', font="Monospace")
-        SSvariables16 = Text('x_dot = Sum(Multiply(A, x), Multiply(B, T));', font="Monospace")
+        SSvariables16 = Text('x_dot = Sum(Multiply(A, x), Multiply(B, torque));', font="Monospace")
         SSvariables17 = Text('x = Sum(x, Multiply(x_dot, dt));', font="Monospace")
-        SSvariables18 = Text('theta = Sum(Multiply(C, x), Multiply(D, T))[0,0];', font="Monospace")
+        SSvariables18 = Text('theta = Sum(Multiply(C, x), Multiply(D, torque))[0,0];', font="Monospace")
         SSvariables19 = Text('theta_dot = Sum(Multiply(C, x_dot), Multiply(D, T))[0, 0];', font="Monospace")
         SSvariables20 = Text('C = new double[,] { { 0, 1 } };', font="Monospace")
         SSvariables21 = Text('theta_ddot = Sum(Multiply(C, x), Multiply(D, T))[0, 0];', font="Monospace")
         SSbrace2 = Text('}')
 
-        SSCode = VGroup(SSbrace1,
-                        SSvariables1,
+        SSCode = VGroup(SSvariables1,
                         SSvariables2,
                         SSvariables3,
                         SSvariables4,
@@ -792,6 +838,7 @@ class Crankshaft(Scene):
                         SSvariables9,
                         SSvariables10,
                         SSvariables11,
+                        SSbrace1,
                         SSvariables12,
                         SSvariables13,
                         SSvariables14,
@@ -824,6 +871,56 @@ class Crankshaft(Scene):
                 self.play(FadeIn(SSCode[i]))
             else:
                 self.play(FadeIn(SSCode[i]))
+        
+        self.remove(SSCode)
+        self.play(FadeOut(SSCode[11]),
+                  FadeOut(SSCode[12]),
+                  FadeOut(SSCode[13]),
+                  FadeOut(SSCode[14]),
+                  FadeOut(SSCode[15]),
+                  FadeOut(SSCode[16]),
+                  FadeOut(SSCode[17]),
+                  FadeOut(SSCode[18]),
+                  FadeOut(SSCode[19]),
+                  FadeOut(SSCode[20]),
+                  FadeOut(SSCode[21]),
+                  FadeOut(SSCode[22]),)
+        
+        self.play(FadeOut(finalSSNotes), run_time = 0.3)
+        self.play(FadeOut(angleEquationGroup), run_time = 0.3)
+
+        # Outtro
+        SSText = Text("State Space").scale(0.75)
+        SSblist = BulletedList("system parameters can change",
+                               "more variables needed",
+                               "more calculation needed").scale(0.75)
+        SSblist.set_color_by_tex("system parameters can change", GREEN)
+        SSblist.set_color_by_tex("more variables needed", RED)
+        SSblist.set_color_by_tex("more calculation needed", RED)
+        SSsum = VGroup(SSText, SSblist).arrange(DOWN, center=False, aligned_edge = LEFT)
+
+        DTFText = Text("Discrete Transfer Function").scale(0.75)
+        DTFblist = BulletedList("less variables needed",
+                               "less calculation needed",
+                               "system parameters can not change").scale(0.75)
+        DTFblist.set_color_by_tex("less variables needed", GREEN)
+        DTFblist.set_color_by_tex("less calculation needed", GREEN)
+        DTFblist.set_color_by_tex("system parameters can not change", RED)
+        DTFsum = VGroup(DTFText, DTFblist).arrange(DOWN, center=False, aligned_edge = LEFT)
+
+        sum = VGroup(SSsum, DTFsum).arrange(RIGHT, buff=1.5)
+
+        self.play(FadeIn(sum))
+        self.wait(3)
+        self.play(FadeOut(sum))
+
+        nextChapterText = Tex("Next Chapter").scale(2)
+        nextChapterTopic = Tex("kinematics and dynamics of slider-crank mechanism")
+        nextChapter = VGroup(nextChapterText, nextChapterTopic).arrange(1.5 * DOWN)
+        self.play(FadeIn(nextChapter))
+        self.wait()
+        self.play(FadeOut(nextChapter))
+        self.wait()
 
 
     def getline(self, Point1, Point2):
