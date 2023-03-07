@@ -301,36 +301,36 @@ class Crankshaft(Scene):
 
         # Create Discrete Model
 
-        code = '''T = @(u, l, r, L) (u * 4 * pi^2 * r^3 * L / 57.2958) / l;
-u = 0.02; % 70C SAE 30
-l = 5.2e-5; %m
-r = 0.05; %m
-L = 0.05; %m
-damping = ((T(u,l,r,L)) * 9 + 4 * 0.05) * 1.5;
-inertia = (0.04 + 0.0515 + 0.00125 * 4 + 0.0079 * 4) * 1.5;
-dt = 0.0001;
-c2d(tf(1, [inertia damping 0]), dt)
-'''
-        rendered_code = Code(code=code, language="matlab", line_spacing=0.5, font="Monospace", stroke_width=1).scale(0.9).move_to(1.5 * DOWN)
-        self.play(FadeIn(rendered_code))
+        # Create Discrete Model
+        matlabCode = Paragraph("T = @(u, l, r, L) (u * 4 * pi^2 * r^3 * L / 57.2958) / l;",
+                               "u = 0.02;   % 70C SAE 30",
+                               "l = 5.2e-5; %m",
+                               "r = 0.05;   %m",
+                               "L = 0.05;   %m",
+                               "damping = ((T(u,l,r,L)) * 9 + 4 * 0.05) * 1.5;",
+                               "inertia = (0.04 + 0.0515 + 0.00125 * 4 + 0.0079 * 4) * 1.5;",
+                               "dt = 0.0001;",
+                               "c2d(tf(1, [inertia damping 0]), dt)", alignment="left", font="Monospace").scale(0.5).move_to(1.5 * DOWN)
+        
+        self.play(FadeIn(matlabCode))
         self.wait(2)
-        result_code = '''ans =
- 
-  2.602e-08 z + 2.602e-08
-  -----------------------
-    z^2 - 2 z + 0.9998
- 
-Sample time: 0.0001 seconds
-Discrete-time transfer function.
-        '''
-        rendered_result_code = Code(code=result_code, language="c", insert_line_no=False, line_spacing=0.5, font="Monospace", stroke_width=1).scale(0.9).move_to(1.5 * DOWN)
-        self.play(ReplacementTransform(rendered_code, rendered_result_code))
+
+        matlabResult = Paragraph("ans =",
+                                 "",
+                                 "2.602e-08 z + 2.602e-08",
+                                 "-----------------------",
+                                 ".  z^2 - 2 z + 0.9998",
+                                 "",
+                                 "Sample time: 0.0001 seconds",
+                                 "Discrete-time transfer function.", alignment="left", font="Monospace").scale(0.5).move_to(1.5 * DOWN)
+
+        self.play(ReplacementTransform(matlabCode, matlabResult))
         self.wait(2)
 
         # Note Discrete Model
 
-        discreateTimeTransferFunction = MathTex("\\frac{\\theta(z)}{T(z)} = \\frac{2.602\, e-08\, z + 2.602\, e-08}{z^2 - 2\, z + 0.9998}").move_to(rendered_result_code.get_center())
-        self.play(FadeOut(rendered_result_code), FadeIn(discreateTimeTransferFunction))
+        discreateTimeTransferFunction = MathTex("\\frac{\\theta(z)}{T(z)} = \\frac{2.602\, e-08\, z + 2.602\, e-08}{z^2 - 2\, z + 0.9998}").move_to(matlabResult.get_center())
+        self.play(FadeOut(matlabResult), FadeIn(discreateTimeTransferFunction))
         self.wait()
 
         self.play(discreateTimeTransferFunction.animate.scale(0.85).next_to(coeffsTexGroup, RIGHT))
@@ -715,6 +715,115 @@ Discrete-time transfer function.
         finalSSNotes = VGroup(coeffsTexGroup, stateSpaceTexGroup, ABCDGruop)
         self.play(finalSSNotes.animate.scale(0.98).move_to(finalSSNotes.get_center() + 1.4 * UP))
         self.wait()
+
+        # CS Example
+
+        DTFbrace1 = Text('{', font="Monospace")
+        DTFAngle1 = Text('angle[0] = (1.999832249154917) * angle[1] -', font="Monospace")
+        DTFAngle2 = Text('.          (0.999832249154917) * angle[2];', font="Monospace")
+        DTFAngle3 = Text('.          (2.601988240193600e-08) * torque[1] +', font="Monospace")
+        DTFAngle4 = Text('.          (2.601842736815161e-08) * torque[2] +', font="Monospace")
+        
+        DTFAngleGroup = VGroup(DTFAngle1,
+                               DTFAngle2,
+                               DTFAngle3,
+                               DTFAngle4).arrange(DOWN, center=False, aligned_edge=LEFT)
+        DTFAngularVelocity = Text('angularVelocity = (angle[0] - angle[1]) / dt;', font="Monospace")
+        DTFAngularAcceleration = Text('angularAcceleration = torque[0] / inertia;', font="Monospace")
+        DTFLast1 = Text('torque[2] = torque[1];', font="Monospace")
+        DTFLast2 = Text('torque[1] = torque[0];', font="Monospace")
+        DTFLast3 = Text('angle[2] = angle[1];', font="Monospace")
+        DTFLast4 = Text('angle[1] = angle[0];', font="Monospace")
+        DFTLastGroup = VGroup(DTFLast1,
+                              DTFLast2,
+                              DTFLast3,
+                              DTFLast4).arrange(DOWN, center=False, aligned_edge=LEFT)
+        DTFbrace2 = Text('}', font="Monospace")
+
+        DTFCode = VGroup(DTFbrace1, DTFAngleGroup, DTFAngularVelocity, DTFAngularAcceleration, DFTLastGroup, DTFbrace2).arrange(DOWN, center=False, aligned_edge=LEFT).scale(0.5).next_to(finalSSNotes, DOWN)
+        DTFbrace1.move_to(DTFbrace1.get_center() + 0.5 * LEFT)
+        DTFbrace2.move_to(DTFbrace2.get_center() + 0.5 * LEFT)
+           
+        for i in range(len(DTFCode)):
+            if(i == 1 or i == 4):
+                for j in range(4):
+                    if(i == 1):
+                        self.play(Indicate(VGroup(angleEquationGroup[0][1 + (j*2)], angleEquationGroup[0][2 + (j*2)])))
+                    self.play(FadeIn(DTFCode[i][j]))
+            else:
+                self.play(FadeIn(DTFCode[i]))
+        
+        self.play(FadeOut(DTFCode))
+
+        SSbrace1 = Text('{')
+        SSvariables1 = Text('public double I;', font="Monospace")
+        SSvariables2 = Text('public double c;', font="Monospace")
+        SSvariables3 = Text('public double k = 0;', font="Monospace")
+        SSvariables4 = Text('double[,] dt = new double[1, 1];', font="Monospace")
+        SSvariables5 = Text('double[,] A = new double[2, 2];', font="Monospace")
+        SSvariables6 = Text('double[,] B = new double[2, 1];', font="Monospace")
+        SSvariables7 = Text('double[,] C = new double[1, 2];', font="Monospace")
+        SSvariables8 = Text('double[,] D = new double[1, 1];', font="Monospace")
+        SSvariables9 = Text('double[,] x_dot = new double[2, 1] { { 0 }, { 0 } };', font="Monospace")
+        SSvariables10 = Text('double[,] x = new double[2, 1] { { 0 }, { 0 } };', font="Monospace")
+        SSvariables11 = Text('public double[,] T = new double[1, 1];', font="Monospace")
+
+        SSvariables12 = Text('A = new double[,] { { 0, 1 }, { (-k / I), (-c / I) } };', font="Monospace")
+        SSvariables13 = Text('B = new double[,] { { 0 }, { (1 / I) } };', font="Monospace")
+        SSvariables14 = Text('C = new double[,] { { 1, 0 } };', font="Monospace")
+        SSvariables15 = Text('D = new double[,] { { 0 } };', font="Monospace")
+        SSvariables16 = Text('x_dot = Sum(Multiply(A, x), Multiply(B, T));', font="Monospace")
+        SSvariables17 = Text('x = Sum(x, Multiply(x_dot, dt));', font="Monospace")
+        SSvariables18 = Text('theta = Sum(Multiply(C, x), Multiply(D, T))[0,0];', font="Monospace")
+        SSvariables19 = Text('theta_dot = Sum(Multiply(C, x_dot), Multiply(D, T))[0, 0];', font="Monospace")
+        SSvariables20 = Text('C = new double[,] { { 0, 1 } };', font="Monospace")
+        SSvariables21 = Text('theta_ddot = Sum(Multiply(C, x), Multiply(D, T))[0, 0];', font="Monospace")
+        SSbrace2 = Text('}')
+
+        SSCode = VGroup(SSbrace1,
+                        SSvariables1,
+                        SSvariables2,
+                        SSvariables3,
+                        SSvariables4,
+                        SSvariables5,
+                        SSvariables6,
+                        SSvariables7,
+                        SSvariables8,
+                        SSvariables9,
+                        SSvariables10,
+                        SSvariables11,
+                        SSvariables12,
+                        SSvariables13,
+                        SSvariables14,
+                        SSvariables15,
+                        SSvariables16,
+                        SSvariables17,
+                        SSvariables18,
+                        SSvariables19,
+                        SSvariables20,
+                        SSvariables21,
+                        SSbrace2).arrange(DOWN, center=False, aligned_edge=LEFT).scale(0.5).next_to(finalSSNotes, DOWN)
+        
+        SSbrace1.move_to(SSbrace1.get_center() + 0.5 * LEFT)
+        SSbrace2.move_to(SSbrace2.get_center() + 0.5 * LEFT)
+
+        highlightList = VGroup(ABCDGruop[0][0][0],
+                               ABCDGruop[0][0][1],
+                               ABCDGruop[0][1][0],
+                               ABCDGruop[0][1][1],
+                               stateSpaceTexGroup[0][0],
+                               stateSpaceTexGroup[0][1])
+        h = 0
+        for i in range(len(SSCode)):
+            if(i < 19 and i > 11 and i != 17):
+                self.play(Indicate(highlightList[h]))
+                h = h + 1
+            if(i > 11):
+                self.remove(SSCode[i-12])
+                SSCode.move_to(SSCode.get_center() + 0.4 * UP)
+                self.play(FadeIn(SSCode[i]))
+            else:
+                self.play(FadeIn(SSCode[i]))
 
 
     def getline(self, Point1, Point2):

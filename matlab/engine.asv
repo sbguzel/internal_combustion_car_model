@@ -5,6 +5,7 @@ u = 0.02;   % 70C SAE 30
 l = 5.2e-5; % oil height m
 r = 0.05;   % journal radius m
 L = 0.05;   % journal depth m
+
 damping = ((D(u,l,r,L)) * 9 + 4 * 0.05) * 1.5;
 inertia = (0.04 + 0.0515 + 0.00125 * 4 + 0.0079 * 4) * 1.5;
 

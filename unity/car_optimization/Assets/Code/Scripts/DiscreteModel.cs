@@ -29,10 +29,10 @@ public class DiscreteModel : MonoBehaviour
 
     void Update()
     {
-        Debug.Log("SS Model Angle : " + (crankshaftSS.angle).ToString("F4", CultureInfo.InvariantCulture) + " - " + "DTF Model Angle : " + (crankshaftDTF.angle[0]).ToString("F4", CultureInfo.InvariantCulture) + " - " + "t : " + t.ToString("F2", CultureInfo.InvariantCulture));
+        Debug.Log("SS Model Angle : " + (crankshaftSS.theta).ToString("F4", CultureInfo.InvariantCulture) + " - " + "DTF Model Angle : " + (crankshaftDTF.theta[0]).ToString("F4", CultureInfo.InvariantCulture) + " - " + "t : " + t.ToString("F2", CultureInfo.InvariantCulture));
 
-        crankDTF.transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)(crankshaftDTF.angle[0] * 57.3)));
-        crankSS.transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)(crankshaftSS.angle * 57.3)));
+        crankDTF.transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)(crankshaftDTF.theta[0] * 57.3)));
+        crankSS.transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)(crankshaftSS.theta * 57.3)));
     }
 
     private void OnDestroy()
@@ -49,12 +49,12 @@ public class DiscreteModel : MonoBehaviour
             if (t < 2)
             {
                 crankshaftDTF.torque[0] = 10;
-                crankshaftSS.torque = 10;
+                crankshaftSS.torque[0,0] = 10;
             }
             else
             {
                 crankshaftDTF.torque[0] = 0;
-                crankshaftSS.torque = 0;
+                crankshaftSS.torque[0, 0] = 0;
             }
 
             // Call Dynamics
