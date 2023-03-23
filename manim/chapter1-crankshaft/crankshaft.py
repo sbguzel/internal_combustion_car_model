@@ -4,6 +4,9 @@ from manim import *
 class Crankshaft(Scene):
 
     def construct(self):
+
+        self.camera.background_color = BURAK
+        
         # Chapter 1
         chapterNumber = Tex("CHAPTER I").scale(3)
         chapterText = Tex("crankshaft dynamic system model").scale(1)
@@ -86,7 +89,7 @@ class Crankshaft(Scene):
 
         # Show Crank-Piston Cycle
         Xoffset = 2 * DOWN
-        startAngle = PI/2
+        startAngle = 0
         curAngle = 0
         l1 = 0.13
         l2 = 0.44
@@ -109,7 +112,17 @@ class Crankshaft(Scene):
 
         for i in range(60):
             curAngle = (2 * PI) * (i / 60) + startAngle
-            pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.cos(curAngle),2)) + (l1 * math.sin(curAngle)) - d
+            pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.cos(curAngle + PI/2),2)) + (l1 * math.sin(curAngle + PI/2)) - d
+            self.play(
+                Rotate(crank, angle= 0.105),
+                piston.animate.move_to(((pistonPosition * 5) + 1.5) * UP + Xoffset),
+                run_time = 1/30)
+        self.wait(2)
+
+        j = 0
+        for i in range(60):
+            curAngle = (2 * PI) * (i / 60) + startAngle
+            pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.cos(curAngle + PI/2),2)) + (l1 * math.sin(curAngle + PI/2)) - d
             self.play(
                 Rotate(crank, angle= 0.105),
                 piston.animate.move_to(((pistonPosition * 5) + 1.5) * UP + Xoffset),
@@ -355,10 +368,10 @@ class Crankshaft(Scene):
         self.wait()
         self.play(FadeIn(changeZpower[1]))
         self.wait(2)
-        changeZpower2 = MathTex("\\frac{\\theta(z)}{T(z)} = \\frac{2.602\, e-08\, z^{-1} + 2.602\, e-08\, z^{-2}}{z - 2\, z^{-1} + 0.9998\, z^{-2}}")
+        changeZpower2 = MathTex("\\frac{\\theta(z)}{T(z)} = \\frac{2.602\, e-08\, z^{-1} + 2.602\, e-08\, z^{-2}}{z^{0} - 2\, z^{-1} + 0.9998\, z^{-2}}")
         self.play(TransformMatchingShapes(changeZpower, changeZpower2))
         self.wait()
-        makeEqFalt = MathTex("\\theta(z)z", "- 2\, ", "\\theta(z)z^{-1}", "+ 0.9998\, ", "\\theta(z)z^{-2}", " = 2.602\, e-08\, ", "T(z)z^{-1}", "+ 2.602\, e-08\, ", "T(z)z^{-2}").scale(0.75)
+        makeEqFalt = MathTex("\\theta(z)z^{0}", "- 2\, ", "\\theta(z)z^{-1}", "+ 0.9998\, ", "\\theta(z)z^{-2}", " = 2.602\, e-08\, ", "T(z)z^{-1}", "+ 2.602\, e-08\, ", "T(z)z^{-2}").scale(0.75)
         self.play(TransformMatchingShapes(changeZpower2, makeEqFalt))
         self.wait()
         for i in range(len(makeEqFalt)):
