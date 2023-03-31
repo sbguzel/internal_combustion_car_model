@@ -101,12 +101,12 @@ class SliderCrank(Scene):
         yLine = Line(crank.get_center(), piston.get_center() + 2 * UP).set_stroke(width=3, color = RED)
         xLine = Line(crank.get_center() + 3 * LEFT, crank.get_center() + 3 * RIGHT).set_stroke(width=3, color = RED)
         
-        zero = MathTex("0^{\\circ}", stroke_width = 2).scale(0.8).set_color(RED).next_to(yLine, UP)
-        origin = MathTex("(0,0)", stroke_width = 2).scale(0.8).set_color(RED).next_to(crank.get_center(), DOWN * 0.5)
+        zero = MathTex("0^{\\circ}", stroke_width = 1).scale(0.8).set_color(RED).next_to(yLine, UP)
+        temporigin = MathTex("(0,0)", stroke_width = 1).scale(0.8).set_color(RED).next_to(crank.get_center(), DOWN * 0.5)
 
         self.play(Create(xLine), Create(yLine))
         self.wait()
-        self.play(FadeIn(zero), FadeIn(origin))
+        self.play(FadeIn(zero), FadeIn(temporigin))
 
         pistonTipLine = Line(piston.get_top() + 2 * LEFT, piston.get_top()).set_stroke(width=1).set_opacity(0.75)
 
@@ -212,7 +212,9 @@ class SliderCrank(Scene):
         line_1 = Line(point1.get_center(), point2.get_center()).set_stroke(width=5)
         line_2 = Line(point2.get_center(), point3.get_center()).set_stroke(width=5)
 
-        self.play(FadeIn(point1, point2, point3, line_1, line_2), FadeOut(crankpistonmodel))
+        lineModelGroup = VGroup(line_1, line_2, point1, point2, point3)
+
+        self.play(FadeIn(lineModelGroup), FadeOut(crankpistonmodel))
 
         self.wait()
 
@@ -236,10 +238,53 @@ class SliderCrank(Scene):
                   showAngleLineText.animate.become(MathTex("\\theta").scale(0.75).set_color(WHITE).next_to(thetaAngle, 0.1 * UP)))
                 
         self.wait()
-        
-        
 
+        position_list = [
+            [0, -2, 0],
+            [point2.get_x(), point2.get_y(), 0],
+            [point3.get_x(), point3.get_y(), 0],
+            [e*5, -2, 0],
+        ]
+        poly = Polygon(*position_list).set_fill(BLUE,opacity=0.5).set_stroke(width=1)
 
+        self.play(FadeIn(poly))
+
+        self.wait()
+
+        plane = NumberPlane(background_line_style={
+                "stroke_color": RED,
+                "stroke_width": 1,
+                "stroke_opacity": 0.5
+            }).move_to(2 * DOWN).set_color(RED)
+        
+        self.play(Create(plane), FadeOut(lineModelGroup, eline, pistonTipLine, showAngleLineText))
+
+        self.wait()
+        
+        position_list_2 = [
+            [0, -2, 0],
+            [-2, -1, 0],
+            [1, 2, 0],
+            [1, -2, 0],
+        ]
+
+        modifiedPoly = Polygon(*position_list_2).set_fill(BLUE,opacity=0.5).set_stroke(width=1)
+        
+        thetaAngle.become(Angle(Line(2.5 * DOWN + RIGHT, 2 * LEFT + DOWN), Line(0 * DOWN, 3 * DOWN), quadrant=(1,-1), other_angle = True, radius=0.4))
+
+        center_vertices = modifiedPoly.get_center_of_edges_outside()
+
+        labels = VGroup(*[
+            MathTex(label).move_to(point) for label,point in zip(["l_1","l_2","y", "e"],center_vertices)
+            ])
+
+        self.play(TransformMatchingShapes(poly, modifiedPoly))
+
+        self.bring_to_front(thetaAngle)
+
+        self.play(Create(labels), FadeOut(yText, etext), temporigin.animate.scale(0.75).move_to(2.2 * DOWN + 0.5 * LEFT))
+
+        self.wait()
 
     def getline(self, Point1, Point2):
         start_point = Point1
@@ -254,3 +299,39 @@ class SliderCrank(Scene):
             return crankXpos * UP + crankYpos * RIGHT + Xoffset
 
 
+class Polygon(Polygon):
+    def get_center_of_edges_outside(self,buff=SMALL_BUFF*3):
+        vertices = self.get_vertices()
+        coords_vertices = []
+        for i in range(len(vertices)):
+            if i < len(vertices)-1:
+                p1,p2 = [vertices[i],vertices[i+1]]
+            else:
+                p1,p2 = [vertices[-1],vertices[0]]
+            guide_line = Line(p1,p2)
+            side = guide_line.get_center()
+            normal_direction = guide_line.copy()
+            normal_direction.rotate(PI/2)
+            vector_normal_direction = normal_direction.get_unit_vector()
+            direction = Dot(side).shift(vector_normal_direction*buff).get_center()
+            coords_vertices.append(direction)
+
+        return coords_vertices
+    
+    def get_center_of_edges_inside(self,buff=SMALL_BUFF*3):
+        vertices = self.get_vertices()
+        coords_vertices = []
+        for i in range(len(vertices)):
+            if i < len(vertices)-1:
+                p1,p2 = [vertices[i],vertices[i+1]]
+            else:
+                p1,p2 = [vertices[-1],vertices[0]]
+            guide_line = Line(p1,p2)
+            side = guide_line.get_center()
+            normal_direction = guide_line.copy()
+            normal_direction.rotate(-PI/2)
+            vector_normal_direction = normal_direction.get_unit_vector()
+            direction = Dot(side).shift(vector_normal_direction*buff).get_center()
+            coords_vertices.append(direction)
+
+        return coords_vertices
