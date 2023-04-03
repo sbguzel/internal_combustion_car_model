@@ -528,11 +528,11 @@ class Section(Scene):
         # Parametric System
 
         number_plane = NumberPlane(
-            x_range=(-21, 9, 1),
+            x_range=(-15, 9, 1),
             y_range=(-7, 17, 1),
-            x_length=7.5,
+            x_length=6,
             y_length=6,
-        ).move_to(DOWN + 3.5 * LEFT).set_opacity(0.25)
+        ).move_to(DOWN + 4 * LEFT).set_opacity(0.25)
 
         self.play(Create(number_plane))
 
@@ -556,7 +556,7 @@ class Section(Scene):
 
         scaleValue = 0.25
 
-        centerDot = Dot(point = 2.25 * DOWN + 2 * LEFT, radius = 0.05)
+        centerDot = Dot(point = 2.25 * DOWN + 3.25 * LEFT, radius = 0.05)
 
         new_center = centerDot.get_center()
 
@@ -568,11 +568,25 @@ class Section(Scene):
 
         self.wait()
 
+        i = 0
         pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(0),2)) + (l1 * math.cos(0)) + h
+        old_pistonPosition = pistonPosition
 
         line_2.add_updater(
-            lambda line: line.become(self.getline(line_1.get_end(), new_center + pistonPosition * 100 * UP * scaleValue).set_stroke(color = PINK))
+            lambda line: line.become(self.getline(line_1.get_end(), new_center + pistonPosition * 100 * UP * scaleValue + e * 100 * scaleValue * RIGHT).set_stroke(color = PINK))
         )
+
+        self.show_axis(new_center[1])
+
+        graph_1 = VGroup()
+        
+        refLine = Line(np.array([0, 0, 0]), np.array([0, 0, 0]))
+
+        refLine.add_updater(
+            lambda line: line.become(Line(np.array([new_center[0] + e * 100 * scaleValue, new_center[1] + pistonPosition * 100  * scaleValue , 0]), np.array([i/10, new_center[1] + pistonPosition * 100  * scaleValue, 0])).set_opacity(0.5))
+        )
+        
+        self.add(refLine)
 
         for i in range(60):
             curAngle = (2 * PI) * (i / 60)
@@ -580,91 +594,82 @@ class Section(Scene):
             self.play(
                 Rotate(line_1, angle= 0.10472, about_point = new_center),
                 run_time = 1/30)
+            
+            graph_1.add(Line(np.array([i/10, new_center[1] + old_pistonPosition * 100  * scaleValue, 0]), np.array([(i+1)/10, new_center[1] + pistonPosition * 100 * scaleValue, 0])))
+            
+            self.add(graph_1[i])
+            old_pistonPosition = pistonPosition
+
         self.wait(2)
 
+        # Example 2
 
-        self.show_axis()
-        self.show_circle()
-        self.move_dot_and_draw_curve()
+        l1 = 0.04
+        l2 = 0.07
+        e = 0.015
+        h = 0
+
+        l1value = MathTex(r"l_1 = 0.04 \, m")
+        l2value = MathTex(r"l_2 = 0.07 \, m")
+        evalue = MathTex(r"e = 0.015 \, m")
+        hvalue = MathTex(r"h = 0 \, m")
+
+        newvalues = VGroup(l1value, l2value, evalue, hvalue).arrange(DOWN, center = False, aligned_edge = LEFT).scale(0.75).move_to(5.5 * LEFT + UP)
+
+        new_line_1 = self.getline(new_center, new_center + scaleValue * l1 * 100 * UP).set_stroke(color = RED)
+
+        i = 0
+        pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(0),2)) + (l1 * math.cos(0)) + h
+        old_pistonPosition = pistonPosition
+
+        self.play(values.animate.become(newvalues),
+                  line_1.animate.become(new_line_1))
+        
+        self.wait()
+
+        for i in range(60):
+            curAngle = (2 * PI) * (i / 60)
+            pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(curAngle),2)) + (l1 * math.cos(curAngle)) + h
+            self.play(
+                Rotate(line_1, angle= 0.10472, about_point = new_center),
+                run_time = 1/30)
+            
+            graph_1.add(Line(np.array([i/10, new_center[1] + old_pistonPosition * 100  * scaleValue, 0]), np.array([(i+1)/10, new_center[1] + pistonPosition * 100 * scaleValue, 0])).set_stroke(color = YELLOW))
+            
+            self.add(graph_1[60 + i])
+            old_pistonPosition = pistonPosition
+
+        
         self.wait()
 
 
-    def show_axis(self):
-        x_start = np.array([2,0,0])
-        x_end = np.array([6,0,0])
+        
+        
 
-        y_start = np.array([-4,-2,0])
-        y_end = np.array([-4,2,0])
+    def show_axis(self, ypos):
+        x_start = np.array([0,ypos,0])
+        x_end = np.array([7,ypos,0])
+
+        y_start = np.array([0,ypos - 2,0])
+        y_end = np.array([0,ypos + 4,0])
 
         x_axis = Line(x_start, x_end)
         y_axis = Line(y_start, y_end)
 
         self.add(x_axis, y_axis)
-        self.add_x_labels()
+        self.add_x_labels(ypos)
 
-        self.origin_point = np.array([2,0,0])
-        self.curve_start = np.array([2,0,0])
+        self.origin_point = np.array([0,ypos,0])
+        self.curve_start = np.array([0,ypos,0])
 
-    def add_x_labels(self):
+    def add_x_labels(self, ypos):
         x_labels = [
             MathTex("\pi"), MathTex("2 \pi")
         ]
 
         for i in range(len(x_labels)):
-            x_labels[i].next_to(np.array([-1 + 2*i, 0, 0]), DOWN)
+            x_labels[i].next_to(np.array([3 + 3*i, ypos, 0]), DOWN)
             self.add(x_labels[i])
-
-    def show_circle(self):
-        circle = Circle(radius=1)
-        circle.move_to(self.origin_point)
-        self.add(circle)
-        self.circle = circle
-
-    def move_dot_and_draw_curve(self):
-        orbit = self.circle
-        origin_point = self.origin_point
-
-        dot = Dot(radius=0.08, color=YELLOW)
-        dot.move_to(orbit.point_from_proportion(0))
-        self.t_offset = 0
-        rate = 0.25
-
-        def go_around_circle(mob, dt):
-            self.t_offset += (dt * rate)
-            # print(self.t_offset)
-            mob.move_to(orbit.point_from_proportion(self.t_offset % 1))
-
-        def get_line_to_circle():
-            return Line(origin_point, dot.get_center(), color=BLUE)
-
-        def get_line_to_curve():
-            x = self.curve_start[0] + self.t_offset * 4
-            y = dot.get_center()[1]
-            return Line(dot.get_center(), np.array([x,y,0]), color=YELLOW_A, stroke_width=2 )
-
-
-        self.curve = VGroup()
-        self.curve.add(Line(self.curve_start,self.curve_start))
-        def get_curve():
-            last_line = self.curve[-1]
-            x = self.curve_start[0] + self.t_offset * 4
-            y = dot.get_center()[1]
-            new_line = Line(last_line.get_end(),np.array([x,y,0]), color=YELLOW_D)
-            self.curve.add(new_line)
-
-            return self.curve
-
-        dot.add_updater(go_around_circle)
-
-        origin_to_circle_line = always_redraw(get_line_to_circle)
-        dot_to_curve_line = always_redraw(get_line_to_curve)
-        sine_curve_line = always_redraw(get_curve)
-
-        self.add(dot)
-        self.add(orbit, origin_to_circle_line, dot_to_curve_line, sine_curve_line)
-        self.wait(8.5)
-
-        dot.remove_updater(go_around_circle)
 
 
 
