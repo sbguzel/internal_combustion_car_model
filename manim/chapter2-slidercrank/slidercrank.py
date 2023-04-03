@@ -83,7 +83,7 @@ class SliderCrank(Scene):
 
         crank = SVGMobject(file_name = "crank.svg").rotate(startAngle).move_to(Xoffset)
         piston = SVGMobject(file_name = "piston.svg").scale(0.5).move_to(((2*l1)*5+1.5)*UP + Xoffset)
-        rod = self.getline(0*UP + 0*DOWN + Xoffset,piston)
+        rod = self.getline(0*UP + 0*DOWN + Xoffset, piston.get_center()).set_stroke(width=50).set_opacity(0.75)
 
         self.play(FadeIn(rod), FadeIn(crank), FadeIn(piston), run_time = 0.5)
         self.wait()
@@ -134,7 +134,7 @@ class SliderCrank(Scene):
         self.add(showAngle)
 
         rod.add_updater(
-            lambda mob: mob.become(self.getline(self.getPointPos(l1, curAngle, startAngle, Xoffset),piston))
+            lambda mob: mob.become(self.getline(self.getPointPos(l1, curAngle, startAngle, Xoffset),piston.get_center()).set_stroke(width=50).set_opacity(0.75))
         )
 
         self.add(showAngleLineText)
@@ -203,18 +203,28 @@ class SliderCrank(Scene):
 
         # Convert Models to Lines
 
-        crankpistonmodel = VGroup(rod, crank, piston)
+        crankpistonmodel = VGroup(piston, rod, crank)
 
         point1 = Dot(point = 2 * DOWN, radius = 0.08)
         point2 = Dot(point = self.getPointPos(l1, curAngle, startAngle, Xoffset), radius = 0.08)
-        point3 = Dot(point = piston.get_top(), radius = 0.08)
+        point3 = Dot(point = piston.get_top() + DOWN/2, radius = 0.08)
 
         line_1 = Line(point1.get_center(), point2.get_center()).set_stroke(width=5)
         line_2 = Line(point2.get_center(), point3.get_center()).set_stroke(width=5)
 
         lineModelGroup = VGroup(line_1, line_2, point1, point2, point3)
 
-        self.play(FadeIn(lineModelGroup), FadeOut(crankpistonmodel))
+        p1 = [piston.get_x(), piston.get_y(), 0]
+        p2 = [piston.get_x(), piston.get_y() + 0.5, 0]
+        pistonLengthBrace = BraceBetweenPoints(p1,p2, buff = 0)
+        pistonLengthTex = Tex("h").next_to(pistonLengthBrace, RIGHT, SMALL_BUFF)
+
+        pistonLengthGroup = VGroup(pistonLengthBrace, pistonLengthTex)
+
+        self.add(lineModelGroup, pistonLengthGroup)
+
+        for i in range(3):
+            self.play(FadeOut(crankpistonmodel[i]), run_time = 0.2)
 
         self.wait()
 
@@ -226,16 +236,17 @@ class SliderCrank(Scene):
         showAngleLineText.clear_updaters()
 
         self.play(eline.animate.become(Line(2 * DOWN + e * 5 * RIGHT, point3.get_center()).set_stroke(width=1).set_opacity(0.75)),
-                  pistonTipLine.animate.become(Line(point3.get_center(), point3.get_center() + e * 5 * LEFT)).set_stroke(width=1).set_opacity(0.75))
+                  pistonTipLine.animate.become(Line(point3.get_center(), point3.get_center() + e * 5 * LEFT)).set_stroke(width=1).set_opacity(0.75),
+                  FadeOut(pistonTipArrow, earrow1, earrow2, showAngle, showAngleLine, pistonLengthGroup))
         
-        thetaAngle = Angle(line_1, yLine, other_angle=True, radius=0.4).set_stroke(width=1).set_opacity(0.75)
+        thetaAngle = Angle(line_1, yLine, other_angle=True, radius=0.4)
 
-        self.play(FadeOut(pistonTipArrow, earrow1, earrow2, showAngle, showAngleLine),
-                  FadeIn(thetaAngle))
-        
-        self.play(etext.animate.next_to(pistonTipLine, UP),
-                  yText.animate.next_to(eline, 0.5 * RIGHT),
-                  showAngleLineText.animate.become(MathTex("\\theta").scale(0.75).set_color(WHITE).next_to(thetaAngle, 0.1 * UP)))
+        yText.become(MathTex("y-h").scale(0.75).move_to(yText.get_center()))
+
+        self.play(FadeIn(thetaAngle),
+                  etext.animate.next_to(pistonTipLine, UP),
+                  yText.animate.next_to(eline, RIGHT),
+                  showAngleLineText.animate.become(MathTex("\\theta").scale(0.75).set_color(WHITE).next_to(thetaAngle, 0.2 * UP)))
                 
         self.wait()
 
@@ -257,9 +268,15 @@ class SliderCrank(Scene):
                 "stroke_opacity": 0.5
             }).move_to(2 * DOWN).set_color(RED)
         
-        self.play(Create(plane), FadeOut(lineModelGroup, eline, pistonTipLine, showAngleLineText))
+        self.play(FadeOut(lineModelGroup, eline, pistonTipLine))
 
         self.wait()
+        
+        self.play(Create(plane), temporigin.animate.scale(0.75).move_to(2.2 * DOWN + 0.5 * LEFT))
+
+        self.wait()
+
+        # Expand Shape
         
         position_list_2 = [
             [0, -2, 0],
@@ -270,26 +287,232 @@ class SliderCrank(Scene):
 
         modifiedPoly = Polygon(*position_list_2).set_fill(BLUE,opacity=0.5).set_stroke(width=1)
         
-        thetaAngle.become(Angle(Line(2.5 * DOWN + RIGHT, 2 * LEFT + DOWN), Line(0 * DOWN, 3 * DOWN), quadrant=(1,-1), other_angle = True, radius=0.4))
 
         center_vertices = modifiedPoly.get_center_of_edges_outside()
 
         labels = VGroup(*[
-            MathTex(label).move_to(point) for label,point in zip(["l_1","l_2","y", "e"],center_vertices)
+            MathTex(label).move_to(point) for label,point in zip(["l_1","l_2","y-h", "e"],center_vertices)
             ])
+        
+        labels[2].move_to(1.75 * RIGHT)
 
-        self.play(TransformMatchingShapes(poly, modifiedPoly))
+        self.play(poly.animate.become(modifiedPoly),
+                 thetaAngle.animate.become(Angle(Line(2.5 * DOWN + RIGHT, 2 * LEFT + DOWN), Line(0 * DOWN, 3 * DOWN), quadrant=(1,-1), other_angle = True, radius=0.4))
+)
 
-        self.bring_to_front(thetaAngle)
+        self.bring_to_front(thetaAngle, showAngleLineText)
 
-        self.play(Create(labels), FadeOut(yText, etext), temporigin.animate.scale(0.75).move_to(2.2 * DOWN + 0.5 * LEFT))
+        oldTextGroup = VGroup(etext, yText)
+
+        self.play(TransformMatchingTex(oldTextGroup,labels))
 
         self.wait()
 
+        # Start Calculation
+
+        line1 = Line(2 * DOWN, DOWN + 2 * LEFT).set_color(YELLOW).set_stroke(width=4)
+        line1_cos = Line(2 * DOWN, DOWN).set_color(YELLOW).set_stroke(width=4)
+
+        self.play(Create(line1))
+
+        self.wait()
+
+        self.play(line1.animate.become(line1_cos))
+
+        self.play(line1.animate.move_to(1.5 * DOWN + RIGHT))
+
+        self.wait()
+
+        p1 = [1,-2,0]
+        p2 = [1,-1,0]
+        brace1 = BraceBetweenPoints(p1,p2, buff = 0)
+
+        l1cos = MathTex(r"l_1 \cdot \cos\theta").scale(0.75).next_to(brace1, RIGHT, SMALL_BUFF)
+
+        self.play(FadeIn(brace1), FadeOut(line1), FadeIn(l1cos))
+
+        self.wait()
+
+        p1 = [1,-1,0]
+        p2 = [1,2,0]
+        brace2 = BraceBetweenPoints(p1,p2, buff = 0)
+        yminusl1cos = MathTex(r"y - h - l_1 \cdot \cos\theta").scale(0.75).next_to(brace2, RIGHT, SMALL_BUFF)
+        pythagoras1 = VGroup(brace2, yminusl1cos)
+        self.play(ReplacementTransform(labels[2], pythagoras1))
+
+        self.wait()
+        
+        self.play(FadeOut(l1cos, brace1))
+
+        self.wait()
+
+        line2 = Line(2 * DOWN, DOWN + 2 * LEFT).set_color(YELLOW).set_stroke(width=4)
+        line2_sin = Line(DOWN, DOWN + 2 * LEFT).set_color(YELLOW).set_stroke(width=4)
+
+        self.play(Create(line2))
+
+        self.wait()
+
+        self.play(line2.animate.become(line2_sin))
+
+        self.wait()
+
+        p1 = [-2,-1,0]
+        p2 = [0,-1,0]
+        brace3 = BraceBetweenPoints(p1,p2, buff = 0)
+
+        l1sin = MathTex(r"l_1 \cdot \sin\theta").scale(0.75).next_to(brace3, DOWN, SMALL_BUFF)
+
+        self.play(FadeIn(brace3, l1sin), FadeOut(line2, thetaAngle, showAngleLineText, labels[0]))
+
+        self.wait()
+
+        p1 = [-2,-1,0]
+        p2 = [1,-1,0]
+        brace4 = BraceBetweenPoints(p1,p2, buff = 0)
+
+        l1sin_e = MathTex(r"l_1 \cdot \sin\theta + e").scale(0.75).next_to(brace4, DOWN, SMALL_BUFF)
+
+        self.play(brace3.animate.become(brace4), TransformMatchingTex(l1sin, l1sin_e))
+
+        self.wait()
+
+        tripoints = [
+            [-2, -1, 0],
+            [1, -1, 0],
+            [1, 2, 0],
+        ]
+
+        showTriangle = Polygon(*tripoints).set_stroke(color = YELLOW, width=4)
+
+        self.play(FadeIn(showTriangle))
+        self.wait(0.5)
+        self.play(FadeOut(showTriangle))
+
+        self.wait()
+
+        # Write Equation
+
+        pythagorasEq = MathTex(r"(y-h-l_1\cdot\cos\theta)^2 + (l_1\cdot\sin\theta+e)^2 = l_2^2").move_to(3.25 * DOWN)
+
+        self.play(Write(pythagorasEq))
+
+        self.wait()
+
+        self.play(FadeOut(plane, xLine, yLine, temporigin, zero, brace3, l1sin_e, pythagoras1, poly, labels[1], labels[3]),
+                  pythagorasEq.animate.move_to(0))
+
+        self.wait()
+
+        pythagorasEq2 = MathTex(r"(y-h-l_1\cdot\cos\theta)^2 = l_2^2 - (l_1\cdot\sin\theta+e)^2")
+
+        self.play(TransformMatchingTex(pythagorasEq, pythagorasEq2))
+        self.wait()
+
+        pythagorasEq3 = MathTex(r"y-h-l_1\cdot\cos\theta = \sqrt{l_2^2 - (l_1\cdot\sin\theta+e)^2}")
+
+        self.play(TransformMatchingTex(pythagorasEq2, pythagorasEq3))
+        self.wait()
+
+        angle_to_y_eq = MathTex(r"y = \sqrt{l_2^2 - (l_1\cdot\sin\theta+e)^2} + l_1\cdot\cos\theta + h")
+
+        self.play(TransformMatchingTex(pythagorasEq3, angle_to_y_eq))
+        self.wait()
+
+        # Note the parameters
+
+        l1tex = MathTex("l_1 = \, stroke / 2")
+        l2tex = MathTex("l_2 = \, rod \,\, length")
+        thtex = MathTex("e = \, piston \,\, \\textit{offset}")
+        
+        parameterGroup = VGroup(l1tex, l2tex, thtex).arrange(DOWN, center= False, aligned_edge=LEFT)
+        box2 = SurroundingRectangle(parameterGroup, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+
+        parametersNoteGroup = VGroup(parameterGroup, box2).scale(0.62).next_to(box1)
+
+        self.play(FadeIn(parametersNoteGroup))
+
+        self.wait()
+
+        # Note the angle to y
+
+        comment = Tex("(h = length from the pin to the top of the piston)").scale(0.75)
+
+        angle_to_y_group = VGroup(angle_to_y_eq, comment).arrange(DOWN)
+
+        self.play(TransformMatchingTex(angle_to_y_eq, angle_to_y_group))
+
+        self.play(angle_to_y_group.animate.scale(0.69).next_to(box2, RIGHT))
+
+        box3 = SurroundingRectangle(angle_to_y_group, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        equationNoteGroup = VGroup(angle_to_y_group, box3)
+
+        self.play(Create(box3))
+
+        self.wait()
+
+        # Parametric System
+
+        number_plane = NumberPlane(
+            x_range=(-21, 9, 1),
+            y_range=(-7, 17, 1),
+            x_length=7.5,
+            y_length=6,
+        ).move_to(DOWN + 3.5 * LEFT).set_opacity(0.25)
+
+        self.play(Create(number_plane))
+
+        self.wait()
+
+        l1 = 0.04
+        l2 = 0.07
+        e = 0
+        h = 0
+
+        l1value = MathTex(r"l_1 = 0.04 \, m")
+        l2value = MathTex(r"l_2 = 0.07 \, m")
+        evalue = MathTex(r"e = 0 \, m")
+        hvalue = MathTex(r"h = 0 \, m")
+
+        values = VGroup(l1value, l2value, evalue, hvalue).arrange(DOWN, center = False, aligned_edge = LEFT).scale(0.75).move_to(5.5 * LEFT + UP)
+
+        self.add(values)
+
+        self.wait()
+
+        scaleValue = 0.25
+
+        centerDot = Dot(point = 2.25 * DOWN + 2 * LEFT, radius = 0.05)
+
+        new_center = centerDot.get_center()
+
+        line_1 = self.getline(new_center, new_center + scaleValue * l1 * 100 * UP).set_stroke(color = RED)
+
+        line_2 = self.getline(new_center + scaleValue * l1 * 100 * UP, new_center + scaleValue * (l1 + l2) * 100 * UP).set_stroke(color = PINK)
+
+        self.add(centerDot, line_1, line_2)
+
+        self.wait()
+
+        pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(0),2)) + (l1 * math.cos(0)) + h
+
+        line_2.add_updater(
+            lambda line: line.become(self.getline(line_1.get_end(), new_center + pistonPosition * 100 * UP * scaleValue))
+        )
+
+        for i in range(60):
+            curAngle = (2 * PI) * (i / 60)
+            pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(curAngle),2)) + (l1 * math.cos(curAngle)) + h
+            self.play(
+                Rotate(line_1, angle= 0.10472, about_point = new_center),
+                run_time = 1/30)
+        self.wait(2)
+
+
+
+
     def getline(self, Point1, Point2):
-        start_point = Point1
-        end_point = Point2.get_center()
-        line = Line(start_point,end_point).set_stroke(width=50).set_opacity(0.75)
+        line = Line(Point1,Point2)
         return line
 
     def getPointPos(self, l1, curAngle, startAngle, Xoffset):
@@ -297,6 +520,164 @@ class SliderCrank(Scene):
             crankXpos = (l1 * 5) * math.cos(curAngle - startAngle)
             crankYpos = -(l1 * 5) * math.sin(curAngle - startAngle)
             return crankXpos * UP + crankYpos * RIGHT + Xoffset
+
+
+class Section(Scene):
+    def construct(self):
+        
+        # Parametric System
+
+        number_plane = NumberPlane(
+            x_range=(-21, 9, 1),
+            y_range=(-7, 17, 1),
+            x_length=7.5,
+            y_length=6,
+        ).move_to(DOWN + 3.5 * LEFT).set_opacity(0.25)
+
+        self.play(Create(number_plane))
+
+        self.wait()
+
+        l1 = 0.04
+        l2 = 0.07
+        e = 0
+        h = 0
+
+        l1value = MathTex(r"l_1 = 0.04 \, m")
+        l2value = MathTex(r"l_2 = 0.07 \, m")
+        evalue = MathTex(r"e = 0 \, m")
+        hvalue = MathTex(r"h = 0 \, m")
+
+        values = VGroup(l1value, l2value, evalue, hvalue).arrange(DOWN, center = False, aligned_edge = LEFT).scale(0.75).move_to(5.5 * LEFT + UP)
+
+        self.add(values)
+
+        self.wait()
+
+        scaleValue = 0.25
+
+        centerDot = Dot(point = 2.25 * DOWN + 2 * LEFT, radius = 0.05)
+
+        new_center = centerDot.get_center()
+
+        line_1 = self.getline(new_center, new_center + scaleValue * l1 * 100 * UP).set_stroke(color = RED)
+
+        line_2 = self.getline(new_center + scaleValue * l1 * 100 * UP, new_center + scaleValue * (l1 + l2) * 100 * UP).set_stroke(color = PINK)
+
+        self.add(centerDot, line_1, line_2)
+
+        self.wait()
+
+        pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(0),2)) + (l1 * math.cos(0)) + h
+
+        line_2.add_updater(
+            lambda line: line.become(self.getline(line_1.get_end(), new_center + pistonPosition * 100 * UP * scaleValue).set_stroke(color = PINK))
+        )
+
+        for i in range(60):
+            curAngle = (2 * PI) * (i / 60)
+            pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(curAngle),2)) + (l1 * math.cos(curAngle)) + h
+            self.play(
+                Rotate(line_1, angle= 0.10472, about_point = new_center),
+                run_time = 1/30)
+        self.wait(2)
+
+
+        self.show_axis()
+        self.show_circle()
+        self.move_dot_and_draw_curve()
+        self.wait()
+
+
+    def show_axis(self):
+        x_start = np.array([2,0,0])
+        x_end = np.array([6,0,0])
+
+        y_start = np.array([-4,-2,0])
+        y_end = np.array([-4,2,0])
+
+        x_axis = Line(x_start, x_end)
+        y_axis = Line(y_start, y_end)
+
+        self.add(x_axis, y_axis)
+        self.add_x_labels()
+
+        self.origin_point = np.array([2,0,0])
+        self.curve_start = np.array([2,0,0])
+
+    def add_x_labels(self):
+        x_labels = [
+            MathTex("\pi"), MathTex("2 \pi")
+        ]
+
+        for i in range(len(x_labels)):
+            x_labels[i].next_to(np.array([-1 + 2*i, 0, 0]), DOWN)
+            self.add(x_labels[i])
+
+    def show_circle(self):
+        circle = Circle(radius=1)
+        circle.move_to(self.origin_point)
+        self.add(circle)
+        self.circle = circle
+
+    def move_dot_and_draw_curve(self):
+        orbit = self.circle
+        origin_point = self.origin_point
+
+        dot = Dot(radius=0.08, color=YELLOW)
+        dot.move_to(orbit.point_from_proportion(0))
+        self.t_offset = 0
+        rate = 0.25
+
+        def go_around_circle(mob, dt):
+            self.t_offset += (dt * rate)
+            # print(self.t_offset)
+            mob.move_to(orbit.point_from_proportion(self.t_offset % 1))
+
+        def get_line_to_circle():
+            return Line(origin_point, dot.get_center(), color=BLUE)
+
+        def get_line_to_curve():
+            x = self.curve_start[0] + self.t_offset * 4
+            y = dot.get_center()[1]
+            return Line(dot.get_center(), np.array([x,y,0]), color=YELLOW_A, stroke_width=2 )
+
+
+        self.curve = VGroup()
+        self.curve.add(Line(self.curve_start,self.curve_start))
+        def get_curve():
+            last_line = self.curve[-1]
+            x = self.curve_start[0] + self.t_offset * 4
+            y = dot.get_center()[1]
+            new_line = Line(last_line.get_end(),np.array([x,y,0]), color=YELLOW_D)
+            self.curve.add(new_line)
+
+            return self.curve
+
+        dot.add_updater(go_around_circle)
+
+        origin_to_circle_line = always_redraw(get_line_to_circle)
+        dot_to_curve_line = always_redraw(get_line_to_curve)
+        sine_curve_line = always_redraw(get_curve)
+
+        self.add(dot)
+        self.add(orbit, origin_to_circle_line, dot_to_curve_line, sine_curve_line)
+        self.wait(8.5)
+
+        dot.remove_updater(go_around_circle)
+
+
+
+    def getline(self, Point1, Point2):
+        line = Line(Point1,Point2)
+        return line
+
+    def getPointPos(self, l1, curAngle, startAngle, Xoffset):
+            curAngle += PI/30
+            crankXpos = (l1 * 5) * math.cos(curAngle - startAngle)
+            crankYpos = -(l1 * 5) * math.sin(curAngle - startAngle)
+            return crankXpos * UP + crankYpos * RIGHT + Xoffset
+
 
 
 class Polygon(Polygon):
