@@ -451,80 +451,18 @@ class SliderCrank(Scene):
 
         self.wait()
 
-        # Parametric System
+        # python code
 
-        number_plane = NumberPlane(
-            x_range=(-21, 9, 1),
-            y_range=(-7, 17, 1),
-            x_length=7.5,
-            y_length=6,
-        ).move_to(DOWN + 3.5 * LEFT).set_opacity(0.25)
-
-        self.play(Create(number_plane))
-
-        self.wait()
-
-        l1 = 0.04
-        l2 = 0.07
-        e = 0
-        h = 0
-
-        l1value = MathTex(r"l_1 = 0.04 \, m")
-        l2value = MathTex(r"l_2 = 0.07 \, m")
-        evalue = MathTex(r"e = 0 \, m")
-        hvalue = MathTex(r"h = 0 \, m")
-
-        values = VGroup(l1value, l2value, evalue, hvalue).arrange(DOWN, center = False, aligned_edge = LEFT).scale(0.75).move_to(5.5 * LEFT + UP)
-
-        self.add(values)
-
-        self.wait()
-
-        scaleValue = 0.25
-
-        centerDot = Dot(point = 2.25 * DOWN + 2 * LEFT, radius = 0.05)
-
-        new_center = centerDot.get_center()
-
-        line_1 = self.getline(new_center, new_center + scaleValue * l1 * 100 * UP).set_stroke(color = RED)
-
-        line_2 = self.getline(new_center + scaleValue * l1 * 100 * UP, new_center + scaleValue * (l1 + l2) * 100 * UP).set_stroke(color = PINK)
-
-        self.add(centerDot, line_1, line_2)
-
-        self.wait()
-
-        pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(0),2)) + (l1 * math.cos(0)) + h
-
-        line_2.add_updater(
-            lambda line: line.become(self.getline(line_1.get_end(), new_center + pistonPosition * 100 * UP * scaleValue))
-        )
-
-        for i in range(60):
-            curAngle = (2 * PI) * (i / 60)
-            pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(curAngle),2)) + (l1 * math.cos(curAngle)) + h
-            self.play(
-                Rotate(line_1, angle= 0.10472, about_point = new_center),
-                run_time = 1/30)
-        self.wait(2)
-
-
-
-
-    def getline(self, Point1, Point2):
-        line = Line(Point1,Point2)
-        return line
-
-    def getPointPos(self, l1, curAngle, startAngle, Xoffset):
-            curAngle += PI/30
-            crankXpos = (l1 * 5) * math.cos(curAngle - startAngle)
-            crankYpos = -(l1 * 5) * math.sin(curAngle - startAngle)
-            return crankXpos * UP + crankYpos * RIGHT + Xoffset
-
-
-class Section(Scene):
-    def construct(self):
+        codeBlock = Paragraph("for i in range(60):",
+                              "    curAngle = (2 * PI) * (i / 60)",
+                              "    pistonPosition = math.sqrt(math.pow(l2,2)",
+                              "                   - math.pow(e + l1 * math.sin(curAngle),2))",
+                              "                   + (l1 * math.cos(curAngle)) + h", font_size=30)
         
+        self.play(FadeIn(codeBlock))
+        self.wait()
+        self.play(FadeOut(codeBlock))
+
         # Parametric System
 
         number_plane = NumberPlane(
@@ -550,7 +488,7 @@ class Section(Scene):
 
         values = VGroup(l1value, l2value, evalue, hvalue).arrange(DOWN, center = False, aligned_edge = LEFT).scale(0.75).move_to(5.5 * LEFT + UP)
 
-        self.add(values)
+        self.play(Write(values))
 
         self.wait()
 
@@ -560,7 +498,7 @@ class Section(Scene):
 
         new_center = centerDot.get_center()
 
-        line_1 = self.getline(new_center, new_center + scaleValue * l1 * 100 * UP).set_stroke(color = RED)
+        line_1 = self.getline(new_center, new_center + scaleValue * l1 * 100 * UP).set_stroke(color = GREEN)
 
         line_2 = self.getline(new_center + scaleValue * l1 * 100 * UP, new_center + scaleValue * (l1 + l2) * 100 * UP).set_stroke(color = PINK)
 
@@ -576,7 +514,30 @@ class Section(Scene):
             lambda line: line.become(self.getline(line_1.get_end(), new_center + pistonPosition * 100 * UP * scaleValue + e * 100 * scaleValue * RIGHT).set_stroke(color = PINK))
         )
 
-        self.show_axis(new_center[1])
+        ypos = new_center[1]
+        x_start = np.array([0,ypos,0])
+        x_end = np.array([7,ypos,0])
+
+        y_start = np.array([0,ypos - 2,0])
+        y_end = np.array([0,ypos + 4,0])
+
+        x_axis = Line(x_start, x_end)
+        y_axis = Line(y_start, y_end)
+
+        self.add(x_axis, y_axis)
+
+        self.origin_point = np.array([0,ypos,0])
+        self.curve_start = np.array([0,ypos,0])
+
+        x_labels = [
+            MathTex("\pi"), MathTex("2 \pi")
+        ]
+
+        for i in range(len(x_labels)):
+            x_labels[i].next_to(np.array([3 + 3*i, ypos, 0]), DOWN)
+            self.add(x_labels[i])
+
+        self.wait()
 
         graph_1 = VGroup()
         
@@ -587,6 +548,8 @@ class Section(Scene):
         )
         
         self.add(refLine)
+
+        self.wait()
 
         for i in range(60):
             curAngle = (2 * PI) * (i / 60)
@@ -616,14 +579,14 @@ class Section(Scene):
 
         newvalues = VGroup(l1value, l2value, evalue, hvalue).arrange(DOWN, center = False, aligned_edge = LEFT).scale(0.75).move_to(5.5 * LEFT + UP)
 
-        new_line_1 = self.getline(new_center, new_center + scaleValue * l1 * 100 * UP).set_stroke(color = RED)
+        new_line_1 = self.getline(new_center, new_center + scaleValue * l1 * 100 * UP).set_stroke(color = GREEN)
 
         i = 0
         pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(0),2)) + (l1 * math.cos(0)) + h
         old_pistonPosition = pistonPosition
-
-        self.play(values.animate.become(newvalues),
-                  line_1.animate.become(new_line_1))
+        
+        self.play(values.animate.become(newvalues))
+        self.play(line_1.animate.become(new_line_1))
         
         self.wait()
 
@@ -639,37 +602,90 @@ class Section(Scene):
             self.add(graph_1[60 + i])
             old_pistonPosition = pistonPosition
 
+        self.wait()
+
+        # Example 3
+
+        l1 = 0.02
+        l2 = 0.06
+        e = 0.005
+        h = 0
+
+        l1value = MathTex(r"l_1 = 0.02 \, m")
+        l2value = MathTex(r"l_2 = 0.06 \, m")
+        evalue = MathTex(r"e = 0.05 \, m")
+        hvalue = MathTex(r"h = 0 \, m")
+
+        newvalues = VGroup(l1value, l2value, evalue, hvalue).arrange(DOWN, center = False, aligned_edge = LEFT).scale(0.75).move_to(5.5 * LEFT + UP)
+
+        new_line_1 = self.getline(new_center, new_center + scaleValue * l1 * 100 * UP).set_stroke(color = GREEN)
+
+        i = 0
+        pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(0),2)) + (l1 * math.cos(0)) + h
+        old_pistonPosition = pistonPosition
+        
+        self.play(values.animate.become(newvalues))
+        self.play(line_1.animate.become(new_line_1))
         
         self.wait()
 
+        for i in range(60):
+            curAngle = (2 * PI) * (i / 60)
+            pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(curAngle),2)) + (l1 * math.cos(curAngle)) + h
+            self.play(
+                Rotate(line_1, angle= 0.10472, about_point = new_center),
+                run_time = 1/30)
+            
+            graph_1.add(Line(np.array([i/10, new_center[1] + old_pistonPosition * 100  * scaleValue, 0]), np.array([(i+1)/10, new_center[1] + pistonPosition * 100 * scaleValue, 0])).set_stroke(color = BLUE))
+            
+            self.add(graph_1[120 + i])
+            old_pistonPosition = pistonPosition
 
+        self.wait(2)
+
+        self.play(FadeOut(values,
+                          graph_1,
+                          number_plane,
+                          x_axis,
+                          y_axis,
+                          centerDot,
+                          refLine,
+                          line_1,
+                          line_2,
+                          x_labels[0],
+                          x_labels[1]))
         
+        self.wait()
+
+        # Dynamics
+
+        Yoffset = 2 * DOWN
+        startAngle = 0
+        curAngle = 0
+        l1 = 0.13
+        l2 = 0.44
+        e = 0
+
+        crank = SVGMobject(file_name = "crank.svg").rotate(startAngle).move_to(Yoffset)
+        piston = SVGMobject(file_name = "piston.svg").scale(0.5).move_to(((2*l1)*5+1.5)*UP + Yoffset)
+        rod = self.getline(0*UP + 0*DOWN + Yoffset, piston.get_center()).set_stroke(width=50).set_opacity(0.75)
+
+        rod.add_updater(
+            lambda rod : rod.become(self.getline((l1 * 5) * math.cos(curAngle) * UP + (l1 * 5) * math.sin(curAngle) * LEFT + Yoffset, piston.get_center()).set_stroke(width=50).set_opacity(0.75))
+        )
+
+        self.play(FadeIn(rod), FadeIn(crank), FadeIn(piston), run_time = 0.5)
+        self.wait()
+
+        for i in range(7):
+            curAngle = (2 * PI) * (i / 60) + startAngle
+            pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(curAngle),2)) + (l1 * math.cos(curAngle)) + h            
+            self.play(Rotate(crank, angle= 0.10472),
+                      piston.animate.move_to(((pistonPosition * 5)) * UP + Yoffset),
+                      run_time = 1/30)
         
+        self.wait()
 
-    def show_axis(self, ypos):
-        x_start = np.array([0,ypos,0])
-        x_end = np.array([7,ypos,0])
-
-        y_start = np.array([0,ypos - 2,0])
-        y_end = np.array([0,ypos + 4,0])
-
-        x_axis = Line(x_start, x_end)
-        y_axis = Line(y_start, y_end)
-
-        self.add(x_axis, y_axis)
-        self.add_x_labels(ypos)
-
-        self.origin_point = np.array([0,ypos,0])
-        self.curve_start = np.array([0,ypos,0])
-
-    def add_x_labels(self, ypos):
-        x_labels = [
-            MathTex("\pi"), MathTex("2 \pi")
-        ]
-
-        for i in range(len(x_labels)):
-            x_labels[i].next_to(np.array([3 + 3*i, ypos, 0]), DOWN)
-            self.add(x_labels[i])
 
 
 
@@ -684,6 +700,47 @@ class Section(Scene):
             return crankXpos * UP + crankYpos * RIGHT + Xoffset
 
 
+class Section(Scene):
+    def construct(self):
+        Yoffset = 2 * DOWN
+        startAngle = 0
+        curAngle = 0
+        l1 = 0.13
+        l2 = 0.44
+        e = 0
+
+        crank = SVGMobject(file_name = "crank.svg").rotate(startAngle).move_to(Yoffset)
+        piston = SVGMobject(file_name = "piston.svg").scale(0.5).move_to(((2*l1)*5+1.5)*UP + Yoffset)
+        rod = self.getline(0*UP + 0*DOWN + Yoffset, piston.get_center()).set_stroke(width=50).set_opacity(0.75)
+
+        rod.add_updater(
+            lambda rod : rod.become(self.getline((l1 * 5) * math.cos(curAngle) * UP + (l1 * 5) * math.sin(curAngle) * LEFT + Yoffset, piston.get_center()).set_stroke(width=50).set_opacity(0.75))
+        )
+
+        self.play(FadeIn(rod), FadeIn(crank), FadeIn(piston), run_time = 0.5)
+        self.wait()
+
+        for i in range(7):
+            curAngle = (2 * PI) * (i / 60) + startAngle
+            pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(curAngle),2)) + (l1 * math.cos(curAngle)) + h            
+            self.play(Rotate(crank, angle= 0.10472),
+                      piston.animate.move_to(((pistonPosition * 5)) * UP + Yoffset),
+                      run_time = 1/30)
+        
+        self.wait()
+
+
+
+    def getline(self, Point1, Point2):
+        line = Line(Point1,Point2)
+        return line
+
+    def getPointPos(self, l1, curAngle, startAngle, Xoffset):
+            curAngle += PI/30
+            crankXpos = (l1 * 5) * math.cos(curAngle - startAngle)
+            crankYpos = -(l1 * 5) * math.sin(curAngle - startAngle)
+            return crankXpos * UP + crankYpos * RIGHT + Xoffset
+        
 
 class Polygon(Polygon):
     def get_center_of_edges_outside(self,buff=SMALL_BUFF*3):
