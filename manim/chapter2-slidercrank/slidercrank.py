@@ -147,7 +147,7 @@ class SliderCrank(Scene):
                 Rotate(showAngleLine, angle= 0.10472, about_point = 2 * DOWN + 0 * LEFT),
                 showAngle.animate.become(Arc(radius = 1.2, angle = curAngle + PI/30, start_angle= PI/2).move_arc_center_to(2 * DOWN).set_color(BLACK)),
                 piston.animate.move_to(((pistonPosition * 5) + 1.5) * UP + Xoffset),
-                run_time = 1/15)
+                run_time = 1/30)
         self.wait(2)
 
         # add e
@@ -308,6 +308,33 @@ class SliderCrank(Scene):
 
         self.wait()
 
+        # Indicate Beta and Gamma
+
+        betaline1 = Line(2 * DOWN + 3 * LEFT, LEFT)
+        betaline2 = Line(4 * LEFT, 2 * DOWN)
+        betaAngle = Angle(betaline1, betaline2, quadrant=(1,1), other_angle = True, radius=0.4)
+        betaTex = MathTex("\\beta").scale(0.75).next_to(betaAngle, RIGHT / 4)
+        beta = VGroup(betaAngle, betaTex)
+
+        gammaline1 = Line(3 * UP + RIGHT, RIGHT)
+        gammaline2 = Line(3 * UP + 2 * RIGHT, UP)
+        gammaAngle = Angle(gammaline1, gammaline2, quadrant=(1,1), other_angle = True, radius=0.4)
+        gammaTex = MathTex("\\gamma").scale(0.75).next_to(gammaAngle, DOWN / 4)
+        gamma = VGroup(gammaAngle, gammaTex)
+
+        self.play(FadeIn(beta, gamma))
+
+        ghost_angle_to_y_eq = MathTex(r"y = \sqrt{l_2^2 - (l_1\cdot\sin\theta+e)^2} + l_1\cdot\cos\theta + h").scale(0.65).to_corner(UR)
+
+        thetagammabetaEq = MathTex(r"\theta + \beta + \gamma = \pi").scale(0.6).next_to(ghost_angle_to_y_eq, DOWN/2)
+
+        self.play(Write(thetagammabetaEq))
+        
+        self.wait()
+
+        self.play(FadeOut(beta, gamma))
+
+        self.wait()
         # Start Calculation
 
         line1 = Line(2 * DOWN, DOWN + 2 * LEFT).set_color(YELLOW).set_stroke(width=4)
@@ -386,7 +413,18 @@ class SliderCrank(Scene):
         showTriangle = Polygon(*tripoints).set_stroke(color = YELLOW, width=4)
 
         self.play(FadeIn(showTriangle))
-        self.wait(0.5)
+        self.wait()
+
+        self.play(FadeIn(gamma))
+
+        gammaEq = MathTex(r"\gamma = \left | \arcsin\left ( \frac{l_1\cdot\sin \theta + e}{l_2} \right ) \right |").scale(0.55)
+
+        otherAnglesGroup = VGroup(thetagammabetaEq, gammaEq)
+
+        self.play(otherAnglesGroup.animate.arrange(1.5 * RIGHT).next_to(ghost_angle_to_y_eq, DOWN / 2))
+
+        self.play(FadeOut(gamma))
+
         self.play(FadeOut(showTriangle))
 
         self.wait()
@@ -436,16 +474,12 @@ class SliderCrank(Scene):
 
         # Note the angle to y
 
-        comment = Tex("(h = length from the pin to the top of the piston)").scale(0.75)
+        self.play(angle_to_y_eq.animate.scale(0.65).to_corner(UR))
 
-        angle_to_y_group = VGroup(angle_to_y_eq, comment).arrange(DOWN)
+        equationsGroup = VGroup(angle_to_y_eq, otherAnglesGroup)
 
-        self.play(TransformMatchingTex(angle_to_y_eq, angle_to_y_group))
-
-        self.play(angle_to_y_group.animate.scale(0.69).next_to(box2, RIGHT))
-
-        box3 = SurroundingRectangle(angle_to_y_group, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
-        equationNoteGroup = VGroup(angle_to_y_group, box3)
+        box3 = SurroundingRectangle(equationsGroup, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+        equationNoteGroup = VGroup(equationsGroup, box3)
 
         self.play(Create(box3))
 
@@ -457,10 +491,10 @@ class SliderCrank(Scene):
                               "    curAngle = (2 * PI) * (i / 60)",
                               "    pistonPosition = math.sqrt(math.pow(l2,2)",
                               "                   - math.pow(e + l1 * math.sin(curAngle),2))",
-                              "                   + (l1 * math.cos(curAngle)) + h", font_size=30)
+                              "                   + (l1 * math.cos(curAngle)) + h", font_size=25, font="consolas")
         
         self.play(FadeIn(codeBlock))
-        self.wait()
+        self.wait(2)
         self.play(FadeOut(codeBlock))
 
         # Parametric System
@@ -613,7 +647,7 @@ class SliderCrank(Scene):
 
         l1value = MathTex(r"l_1 = 0.02 \, m")
         l2value = MathTex(r"l_2 = 0.06 \, m")
-        evalue = MathTex(r"e = 0.05 \, m")
+        evalue = MathTex(r"e = 0.005 \, m")
         hvalue = MathTex(r"h = 0 \, m")
 
         newvalues = VGroup(l1value, l2value, evalue, hvalue).arrange(DOWN, center = False, aligned_edge = LEFT).scale(0.75).move_to(5.5 * LEFT + UP)
@@ -665,6 +699,7 @@ class SliderCrank(Scene):
         l1 = 0.13
         l2 = 0.44
         e = 0
+        h = 0
 
         crank = SVGMobject(file_name = "crank.svg").rotate(startAngle).move_to(Yoffset)
         piston = SVGMobject(file_name = "piston.svg").scale(0.5).move_to(((2*l1)*5+1.5)*UP + Yoffset)
@@ -686,7 +721,138 @@ class SliderCrank(Scene):
         
         self.wait()
 
+        refline1 = Line(2 * UP, 3.5 * DOWN).set_stroke(color = GRAY, width=1)
+        refline2 = Line(2 * UP + 0.25 * RIGHT, 3.5 * DOWN + 0.75 * LEFT).set_stroke(color = GRAY, width=1)
+        refline3 = Line(0.75 * DOWN + 1.5 * LEFT, 3 * DOWN + 1.25 * RIGHT).set_stroke(color = GRAY, width=1)
 
+        refLines = VGroup(refline1, refline2, refline3)
+
+        self.play(Create(refLines))
+        
+        self.wait()
+
+        chamberForce = Arrow(2 * UP, piston.get_center() + 0.25 * UP, max_tip_length_to_length_ratio=0.3, max_stroke_width_to_length_ratio = 10, color = RED)
+
+        self.add(chamberForce)
+
+        self.wait()
+
+        self.play(chamberForce.animate.move_to(0.4 * UP))
+
+        self.play(Rotate(chamberForce, -PI / 20, about_point=chamberForce.get_start()))
+
+        self.wait(0.5)
+
+        self.play(chamberForce.animate.move_to(1.9 * DOWN + 0.475 * LEFT))
+
+        self.play(Rotate(chamberForce, -PI / 6, about_point=chamberForce.get_start()))
+
+        torqueDistance = Line(chamberForce.get_start(), 2 * DOWN).set_stroke(color = BLUE, width=3)
+
+        self.play(FadeIn(torqueDistance))
+
+        l1text = MathTex("l_1").scale(0.6).set_color(BLUE).next_to(torqueDistance, RIGHT)
+        
+        self.play(FadeIn(l1text))
+
+        self.wait()
+
+        self.play(FadeOut(piston), run_time = 0.2)
+        self.play(FadeOut(rod), run_time = 0.2)
+        self.play(FadeOut(crank), run_time = 0.2)
+        self.wait()
+
+        showGammaAngle = Angle(refline1, refline2, quadrant=(1,1), other_angle = True, radius=0.5)
+
+        showBetaAngle = Angle(refline2, refline3, quadrant=(-1,1), other_angle = True, radius=0.2)
+
+        showBeta2Angle = Angle(refline2, refline3, quadrant=(1,1), radius=0.2)
+
+        torqueEq = MathTex("Torque \,\, on \,\, crankshaft =", "Force \\cdot cos(\\gamma)", "\\cdot sin(\\pi - \\beta)", "\\cdot l_1").scale(0.58).next_to(box1, DOWN).to_edge(LEFT)
+
+        self.play(FadeIn(torqueEq[0]))
+        
+        self.play(FadeIn(showGammaAngle))
+
+        self.wait()
+        
+        self.play(FadeIn(torqueEq[1]))
+
+        self.wait()
+
+        self.play(FadeIn(showBetaAngle), FadeOut(showGammaAngle))
+
+        self.wait()
+
+        self.play(FadeIn(showBeta2Angle), FadeOut(showBetaAngle))
+
+        self.wait()
+        
+        self.play(FadeIn(torqueEq[2]))
+
+        self.play(Indicate(torqueDistance))
+
+        self.play(FadeIn(torqueEq[3]))
+
+        self.wait()
+
+        box4 = SurroundingRectangle(torqueEq, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
+
+        torqueEqGroup = VGroup(box4, torqueEq)
+
+        self.play(Create(box4), FadeOut(refline1, refline2, refline3, showBeta2Angle, l1text, torqueDistance, chamberForce))
+
+        self.wait()
+
+        matlabExample = Text("MATLAB Example").scale(0.85)
+
+        self.play(FadeIn(matlabExample))
+
+        self.wait()
+
+        self.play(FadeOut(matlabExample))
+
+        csExample = Text("C# Example").scale(0.85)
+
+        self.play(FadeIn(csExample))
+
+        self.wait()
+
+        self.play(FadeOut(csExample))
+
+        cscodeBlock = Paragraph("Class Piston{",
+                                "    double position;",
+                                "    double force = 0;",
+                                "    double torque = 0;",
+                                "    height = 0;",
+                                "",
+                                "    public void kinematics(double l1, double l2, double e, double theta){",
+                                "        position = Math.Sqrt(Math.Pow(l2,2) -",
+                                "                   Math.Pow(l1 * Math.Sin(theta) + e, 2)) +",
+                                "                   l1 * Math.Cos(theta) + height;",
+                                "        gamma = Math.Abs(Math.Asin((l1 * Math.Sin(theta) + height)/(l2)))",
+                                "        beta = Math.PI - theta - gamma",
+                                "        torque = force * Math.Cos(gamma) * Math.Sin(Math.PI - beta) * l1",
+                                "    }",
+                                "}",
+                                font_size=20, font="consolas").move_to(DOWN)
+        
+        self.play(FadeIn(cscodeBlock))
+        
+        self.wait()
+        
+        self.play(FadeOut(cscodeBlock, sliderCrankBlackBoxGroup, parametersNoteGroup, equationNoteGroup, torqueEqGroup))
+
+        self.wait()
+
+        nextChapterText = Tex("Next Chapter").scale(2)
+        nextChapterTopic = Tex("camshaft and valves")
+        nextChapter = VGroup(nextChapterText, nextChapterTopic).arrange(1.5 * DOWN)
+        self.play(FadeIn(nextChapter))
+        self.wait()
+        self.play(FadeOut(nextChapter))
+        self.wait()
+        
 
 
     def getline(self, Point1, Point2):
@@ -699,48 +865,6 @@ class SliderCrank(Scene):
             crankYpos = -(l1 * 5) * math.sin(curAngle - startAngle)
             return crankXpos * UP + crankYpos * RIGHT + Xoffset
 
-
-class Section(Scene):
-    def construct(self):
-        Yoffset = 2 * DOWN
-        startAngle = 0
-        curAngle = 0
-        l1 = 0.13
-        l2 = 0.44
-        e = 0
-
-        crank = SVGMobject(file_name = "crank.svg").rotate(startAngle).move_to(Yoffset)
-        piston = SVGMobject(file_name = "piston.svg").scale(0.5).move_to(((2*l1)*5+1.5)*UP + Yoffset)
-        rod = self.getline(0*UP + 0*DOWN + Yoffset, piston.get_center()).set_stroke(width=50).set_opacity(0.75)
-
-        rod.add_updater(
-            lambda rod : rod.become(self.getline((l1 * 5) * math.cos(curAngle) * UP + (l1 * 5) * math.sin(curAngle) * LEFT + Yoffset, piston.get_center()).set_stroke(width=50).set_opacity(0.75))
-        )
-
-        self.play(FadeIn(rod), FadeIn(crank), FadeIn(piston), run_time = 0.5)
-        self.wait()
-
-        for i in range(7):
-            curAngle = (2 * PI) * (i / 60) + startAngle
-            pistonPosition = math.sqrt(math.pow(l2,2) - math.pow(e + l1 * math.sin(curAngle),2)) + (l1 * math.cos(curAngle)) + h            
-            self.play(Rotate(crank, angle= 0.10472),
-                      piston.animate.move_to(((pistonPosition * 5)) * UP + Yoffset),
-                      run_time = 1/30)
-        
-        self.wait()
-
-
-
-    def getline(self, Point1, Point2):
-        line = Line(Point1,Point2)
-        return line
-
-    def getPointPos(self, l1, curAngle, startAngle, Xoffset):
-            curAngle += PI/30
-            crankXpos = (l1 * 5) * math.cos(curAngle - startAngle)
-            crankYpos = -(l1 * 5) * math.sin(curAngle - startAngle)
-            return crankXpos * UP + crankYpos * RIGHT + Xoffset
-        
 
 class Polygon(Polygon):
     def get_center_of_edges_outside(self,buff=SMALL_BUFF*3):
