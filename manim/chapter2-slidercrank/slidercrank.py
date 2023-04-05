@@ -824,7 +824,7 @@ class SliderCrank(Scene):
                                 "    double position;",
                                 "    double force = 0;",
                                 "    double torque = 0;",
-                                "    height = 0;",
+                                "    double height = 0;",
                                 "",
                                 "    public void kinematics(double l1, double l2, double e, double theta){",
                                 "        position = Math.Sqrt(Math.Pow(l2,2) -",
