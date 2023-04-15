@@ -17,10 +17,11 @@ public class discreteModel : MonoBehaviour
     const double inertia = 0.19215;
     const double damping = 0.32236;
     const double dt = 0.0001;
-    const double l1 = 6.4; //cm
-    const double l2 = 13; //cm
+    const double l1 = 6.45; //cm
+    const double l2 = 12.5; //cm
     const double e = 0;
     const double h = 0;
+    const double rad2deg = 57.2958;
 
     public static Crankshaft crankshaft = new Crankshaft(inertia, damping, dt);
     public static Piston piston = new Piston();
@@ -45,7 +46,7 @@ public class discreteModel : MonoBehaviour
             crankshaft.torque[0,0] = 0;
         }
 
-        crankshaftGO.transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)(crankshaft.theta * 57.3)));
+        crankshaftGO.transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)(crankshaft.theta * rad2deg)));
         pistonGO.transform.position = new Vector3(0, (float)piston.position, (float)(-5.5));
         double rodAngle = connectingRodAngle(piston.position, crankshaft.theta);
         connectingRodGO.transform.SetPositionAndRotation(pistonGO.transform.position, Quaternion.Euler(new Vector3(0, 0, (float)(-rodAngle))));
@@ -70,7 +71,7 @@ public class discreteModel : MonoBehaviour
     {
         double crankXpos = l1 * Math.Sin(crankAngle);
         double crankYpos = l1 * Math.Cos(crankAngle);
-        return Math.Atan(crankXpos / (pistonYpos - crankYpos)) * 57.3;
+        return Math.Atan(crankXpos / (pistonYpos - crankYpos)) * rad2deg;
     }
 
     private void OnDestroy()
