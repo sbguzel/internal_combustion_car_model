@@ -3,6 +3,7 @@ using System;
 public class Valve
 {
     // System Parameters
+    public double diameter;
     public double m;
     public double c;
     public double k;
@@ -22,13 +23,15 @@ public class Valve
     public double position = preload;
     public double velocity = 0;
     public double acceleration = 0;
+    public double area;
     // Input
     double input = preload;
     double input_last = preload;
     double input_dot = 0;
 
-    public Valve(double inertia, double damping, double springCoefficient, double dt)
+    public Valve(double diameter, double inertia, double damping, double springCoefficient, double dt)
     {
+        this.diameter = diameter;
         m = inertia;
         c = damping;
         k = springCoefficient;
@@ -62,6 +65,8 @@ public class Valve
         acceleration = Multiply(C, x_dot)[0, 0];
         C = new double[,] { { 0, 1 } };
         velocity = Multiply(C, x)[0, 0];
+
+        area = 2 * Math.PI * (diameter/2) * (position - 0.01);
 
         input_last = input;
     }

@@ -5,6 +5,8 @@ using System.Globalization;
 using System.Threading.Tasks;
 using System.Timers;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class discreteModel : MonoBehaviour
 {
@@ -15,11 +17,14 @@ public class discreteModel : MonoBehaviour
     public GameObject exhaustValveGO;
     public GameObject intakeCamGO;
     public GameObject intakeValveGO;
-    public static int slowMotionValue = 1;
+    public TMP_Text rpmText;
+    public TMP_InputField setSpringCoefficent;
+    public Button slowMotionButton;
+    public static int slowMotionValue = 100;
     private static Timer aTimer;
     static double elapsedTime = 0;
-    const double inertia = 0.19215;
-    const double damping = 0.32236;
+    const double crankInertia = 0.19215;
+    const double crankDamping = 0.32236;
     const double dt = 0.0001;
     const double l1 = 6.45; //cm
     const double l2 = 12.5; //cm
@@ -27,10 +32,10 @@ public class discreteModel : MonoBehaviour
     const double h = 0;
     const double rad2deg = 57.2958;
 
-    public static Crankshaft crankshaft = new Crankshaft(inertia, damping, dt);
+    public static Crankshaft crankshaft = new Crankshaft(crankInertia, crankDamping, dt);
     public static Piston piston = new Piston();
-    public static Valve intakeValve = new Valve(0.15, 100, 65000, dt);
-    public static Valve exhaustValve = new Valve(0.15, 100, 65000, dt);
+    public static Valve intakeValve = new Valve(0.04, 0.15, 100, 65000, dt);
+    public static Valve exhaustValve = new Valve(0.04, 0.15, 100, 65000, dt);
 
     // Start is called before the first frame update
     void Start()
@@ -38,14 +43,34 @@ public class discreteModel : MonoBehaviour
         aTimer = new(10); 
         aTimer.Elapsed += async (sender, e) => await HandleTimer(e);
         aTimer.Start();
+
+        slowMotionButton.onClick.AddListener(TaskOnClick);
+    }
+
+     void TaskOnClick()
+    {
+        if(slowMotionValue == 100){
+            slowMotionValue = 1;
+        }else{
+            slowMotionValue = 100;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        rpmText.text = "RPM : " + (crankshaft.theta_dot * 9.5492968).ToString("F1");
+
+        double setSpringCoef = Convert.ToDouble(setSpringCoefficent.text);
+
+        if(setSpringCoef != intakeValve.k){
+            intakeValve.k = setSpringCoef;
+            exhaustValve.k = setSpringCoef;
+        }
+
         if (Input.GetKey(KeyCode.Keypad0))
         {
-            crankshaft.torque[0,0] = 200;
+            crankshaft.torque[0,0] = 300;
         }
         else
         {
@@ -63,7 +88,6 @@ public class discreteModel : MonoBehaviour
         pistonGO.transform.position = new Vector3(0, (float)piston.position, (float)(-5.5));
         double rodAngle = connectingRodAngle(piston.position, crankshaft.theta);
         connectingRodGO.transform.SetPositionAndRotation(pistonGO.transform.position, Quaternion.Euler(new Vector3(0, 0, (float)(-rodAngle))));
-
     }
 
     private static Task HandleTimer(ElapsedEventArgs ee)
