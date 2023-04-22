@@ -88,6 +88,8 @@ class Camshaft(Scene):
         box1 = SurroundingRectangle(valvetrainBlackBoxGroup, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
         self.play(Create(box1))
 
+        valvetrainBlackBoxGroup.add(box1)
+
         self.wait()
 
         camProfileEq = MathTex(r"e^{-(2 \cdot x - pi/2)^{4}}")
@@ -96,7 +98,7 @@ class Camshaft(Scene):
 
         self.wait()
 
-        self.play(camProfileEq.animate.next_to(valvetrainBlackBoxGroup, 1.5 * RIGHT))
+        self.play(camProfileEq.animate.next_to(valvetrainBlackBoxGroup, 1.4 * RIGHT))
 
         box2 = SurroundingRectangle(camProfileEq, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
         self.play(Create(box2))
@@ -422,8 +424,36 @@ class Camshaft(Scene):
 
         box5 = SurroundingRectangle(stateSpaceTexFinal, buff=SMALL_BUFF).set_stroke(color=GREEN, width=1)
         self.play(Create(box5))
-        polarCamSumGroup = VGroup(stateSpaceTexFinal, box5)
+        stateSpaceTexGroup = VGroup(stateSpaceTexFinal, box5)
 
+        self.wait()
+
+        matlabExample = Text("MATLAB Example").scale(0.85)
+
+        self.play(FadeIn(matlabExample))
+
+        self.wait()
+
+        self.play(FadeOut(matlabExample))
+
+        csExample = Text("C# Example").scale(0.85)
+
+        self.play(FadeIn(csExample))
+
+        self.wait()
+
+        self.play(FadeOut(csExample))
+
+        self.wait()
+
+        self.play(FadeOut(stateSpaceTexGroup, polarCamSumGroup, valvetrainBlackBoxGroup, camProfileEqGroup, gearRatioGroup))
+
+        nextChapterText = Tex("Next Chapter").scale(2)
+        nextChapterTopic = Tex("thermodynamics")
+        nextChapter = VGroup(nextChapterText, nextChapterTopic).arrange(1.5 * DOWN)
+        self.play(FadeIn(nextChapter))
+        self.wait()
+        self.play(FadeOut(nextChapter))
         self.wait()
 
 
@@ -437,14 +467,6 @@ class Camshaft(Scene):
             crankXpos = (l1 * 5) * math.cos(curAngle - startAngle)
             crankYpos = -(l1 * 5) * math.sin(curAngle - startAngle)
             return crankXpos * UP + crankYpos * RIGHT + Xoffset + Yoffset
-
-
-class Section(Scene):
-     def construct(self):
-        self.wait()
-
-
-
 
 
 class Spring(VMobject):

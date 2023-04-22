@@ -34,8 +34,8 @@ public class discreteModel : MonoBehaviour
 
     public static Crankshaft crankshaft = new Crankshaft(crankInertia, crankDamping, dt);
     public static Piston piston = new Piston();
-    public static Valve intakeValve = new Valve(0.04, 0.15, 100, 65000, dt);
-    public static Valve exhaustValve = new Valve(0.04, 0.15, 100, 65000, dt);
+    public static Valve intakeValve = new Valve(0.04, 0.15, 100, 70000, dt);
+    public static Valve exhaustValve = new Valve(0.04, 0.15, 100, 70000, dt);
 
     // Start is called before the first frame update
     void Start()
@@ -79,12 +79,12 @@ public class discreteModel : MonoBehaviour
 
         crankshaftGO.transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)(crankshaft.theta * rad2deg)));
         
-        exhaustCamGO.transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)(crankshaft.theta / 2 * rad2deg)));
+        intakeValveGO.transform.position = new Vector3(0, (float)(24 - intakeValve.position), (float)(-3));
         intakeCamGO.transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)(crankshaft.theta / 2 * rad2deg)));
         
-        intakeValveGO.transform.position = new Vector3(0, (float)(24 - intakeValve.position), (float)(-3));
         exhaustValveGO.transform.position = new Vector3(0, (float)(24 - exhaustValve.position), (float)(-8));
-
+        exhaustCamGO.transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)(crankshaft.theta / 2 * rad2deg)));
+        
         pistonGO.transform.position = new Vector3(0, (float)piston.position, (float)(-5.5));
         double rodAngle = connectingRodAngle(piston.position, crankshaft.theta);
         connectingRodGO.transform.SetPositionAndRotation(pistonGO.transform.position, Quaternion.Euler(new Vector3(0, 0, (float)(-rodAngle))));

@@ -12,9 +12,7 @@ public class Valve
     double[,] dt = new double[1, 1];
     // State-Space Matrices
     double[,] A;
-    double[,] B;
     double[,] C;
-    double[,] D;
     // State Matrices
     double[,] x_dot = new double[2, 1] { { 0 }, { 0 } };
     double[,] x = new double[2, 1] { { 0 }, { 0 } };
@@ -23,7 +21,7 @@ public class Valve
     public double position = preload;
     public double velocity = 0;
     public double acceleration = 0;
-    public double area;
+    public double opening;
     // Input
     double input = preload;
     double input_last = preload;
@@ -45,9 +43,7 @@ public class Valve
         input_dot = (input - input_last) / dt[0,0];
 
         A = new double[,] { { 0, 1 }, { (-k / m), (-c / m) } };
-        B = new double[,] { { 0 }, { (1 / m) } };
         C = new double[,] { { 1, 0 } };
-        D = new double[,] { { 0 } };
 
         x_temp = Sum(x, Multiply(x_dot, dt));
 
@@ -66,7 +62,7 @@ public class Valve
         C = new double[,] { { 0, 1 } };
         velocity = Multiply(C, x)[0, 0];
 
-        area = 2 * Math.PI * (diameter/2) * (position - 0.01);
+        opening = 2 * Math.PI * (diameter/2) * (position - 0.01);
 
         input_last = input;
     }
