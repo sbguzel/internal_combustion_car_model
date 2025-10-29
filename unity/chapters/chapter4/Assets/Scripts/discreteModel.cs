@@ -19,6 +19,7 @@ public class discreteModel : MonoBehaviour
     public GameObject intakeCamGO;
     public GameObject intakeValveGO;
     public GameObject controlVolumeGO;
+    public GameObject flywheelGO;
     public Material controlVolumeMaterial;
     public TMP_Text rpmText;
     public Button slowMotionButton;
@@ -32,11 +33,12 @@ public class discreteModel : MonoBehaviour
     const double rad2deg = 57.2958;
 
     // Engine related
-    readonly Block block = new(0.0005, 1, 0);
+    readonly Block block = new(0.00064842472, 1, 0);
     readonly Crankshaft crankshaft = new(0.19215, 0.32236);
-    readonly Piston piston = new(0.07024981844, 0.025);
+    readonly Piston piston = new(0.08, 0.03);
     readonly ConnectingRod connectingRod = new(0.125);
     readonly CylinderHead cylinderHead = new();
+    readonly Flywheel flywheel = new(0.15, 0.03, 7850);
 
     double additionalTorque = 0;
 
@@ -45,7 +47,7 @@ public class discreteModel : MonoBehaviour
 
     void Start()
     {
-        engine = new Engine(block, crankshaft, piston, connectingRod, cylinderHead, 8, dt);
+        engine = new Engine(block, crankshaft, piston, connectingRod, cylinderHead, flywheel, 8, dt);
 
         aTimer = new(dt * physicsFrequency);
         aTimer.Elapsed += async (sender, e) => await HandleTimer(e);
@@ -56,18 +58,20 @@ public class discreteModel : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(engine.pistonAssemblies[0].controlVolume.temperature + "  " + engine.pistonAssemblies[0].controlVolume.pressure);
         rpmText.text = "RPM : " + (crankshaft.theta_dot * 9.5492968).ToString("F1");
 
         if (Input.GetKey(KeyCode.Space))
         {
-            additionalTorque = 500;
+            additionalTorque = 250;
         }
         else
         {
             additionalTorque = 0;
         }
 
+        flywheelGO.transform.SetPositionAndRotation(new Vector3(0, 0, (float)flywheel.thickness * 100 / 2), Quaternion.Euler(new Vector3(0, 0, (float)(crankshaft.theta * rad2deg))));
+        flywheelGO.transform.localScale = new Vector3((float)flywheel.radius * 2 * 100, (float)flywheel.radius * 2 * 100, (float)flywheel.thickness * 100 / 2);
+        
         crankshaftGO.transform.rotation = Quaternion.Euler(new Vector3(0, 0, (float)(crankshaft.theta * rad2deg)));
 
         intakeValveGO.transform.position = new Vector3(0, (float)(23.93 - engine.cylinderHead.intakeValves[0].position), (float)(-3));

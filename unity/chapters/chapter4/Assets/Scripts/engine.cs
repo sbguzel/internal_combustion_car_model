@@ -1,5 +1,4 @@
 using System;
-using System.Text.RegularExpressions;
 
 public class Engine
 {
@@ -8,16 +7,18 @@ public class Engine
     public Piston piston;
     public ConnectingRod connectingRod;
     public CylinderHead cylinderHead;
+    public Flywheel flywheel;
     double compressionRatio;
     public PistonAssembly[] pistonAssemblies;
 
-    public Engine(Block block, Crankshaft crankShaft, Piston piston, ConnectingRod connectingRod, CylinderHead cylinderHead, double compressionRatio, double dt)
+    public Engine(Block block, Crankshaft crankShaft, Piston piston, ConnectingRod connectingRod, CylinderHead cylinderHead, Flywheel flywheel, double compressionRatio, double dt)
     {
         this.block = block;
         this.crankShaft = crankShaft;
         this.piston = piston;
         this.connectingRod = connectingRod;
         this.cylinderHead = cylinderHead;
+        this.flywheel = flywheel;
         this.compressionRatio = compressionRatio;
 
         InitializeParameters(dt);
@@ -25,6 +26,8 @@ public class Engine
 
     void InitializeParameters(double dt)
     {
+        double internalComponentsInertia = 0.25;
+        crankShaft.AddInertia(flywheel.inertia + internalComponentsInertia);
         // Set up crankshaft solver
         crankShaft.SetSolver(dt);
         // Calculate crankshaft throw length based on engine size and number of cylinders

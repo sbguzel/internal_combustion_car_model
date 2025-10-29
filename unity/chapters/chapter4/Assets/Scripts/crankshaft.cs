@@ -6,6 +6,7 @@ public class Crankshaft
     public double I;
     public double c;
     public double k = 0;
+    public double extraI;
     // States
     public double theta = 0;
     public double theta_dot = 0;
@@ -20,6 +21,7 @@ public class Crankshaft
     {
         I = inertia;
         c = damping;
+        extraI = 0;
     }
 
     public void CalculateThrowLength(double pistonVolume, double pistonArea)
@@ -27,10 +29,15 @@ public class Crankshaft
         throwLength = (pistonVolume / pistonArea) / 2;
     }
 
+    public void AddInertia(double extraI)
+    {
+        this.extraI = extraI;
+    }
+
     public void SetSolver(double dt)
     {
-        double[,] A = new double[,] { { 0, 1 }, { (-k / I), (-c / I) } };
-        double[,] B = new double[,] { { 0 }, { (1 / I) } };
+        double[,] A = new double[,] { { 0, 1 }, { (-k / (I + extraI)), (-c / (I + extraI)) } };
+        double[,] B = new double[,] { { 0 }, { (1 / (I + extraI)) } };
         double[,] C = new double[,] { { 1, 0 } };
         double[,] D = new double[,] { { 0 } };
         stateSpaceSolver = new StateSpaceSolver(A, B, C, D, dt);
