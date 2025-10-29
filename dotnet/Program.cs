@@ -9,6 +9,7 @@ ConnectingRod connectingRod = new ConnectingRod(block.stroke, 0);
 Fuel fuel = new Fuel(800, 46400, 0.25, 12.6);
 Engine engine = new Engine(block, cylinderHead, crankshaft, connectingRod, fuel);
 
+
 engine.initialize();
 
 for (int i=0; i< simulation.runTime/simulation.dt; i++)

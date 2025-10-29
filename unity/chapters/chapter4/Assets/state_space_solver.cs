@@ -41,6 +41,10 @@ class StateSpaceSolver
     {
         x = new double[2, 1] { { position }, { velocity } };
         x_dot = new double[2, 1] { { velocity }, { 0 } };
+        
+        this.position = position;
+        this.velocity = velocity;
+        this.acceleration = 0;
     }
 
     // Matrix Operations

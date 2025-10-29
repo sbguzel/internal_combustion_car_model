@@ -1,3 +1,5 @@
+using System;
+
 public class Crankshaft
 {
     // System Parameters
@@ -8,17 +10,16 @@ public class Crankshaft
     public double theta = 0;
     public double theta_dot = 0;
     public double theta_ddot = 0;
+    public double moddedAngle = 0;
     // Derived Parameters
     public double throwLength;
     // Solver
     StateSpaceSolver stateSpaceSolver;
 
-    public Crankshaft(double inertia, double damping, double dt)
+    public Crankshaft(double inertia, double damping)
     {
         I = inertia;
         c = damping;
-
-        SetSolver(dt);
     }
 
     public void CalculateThrowLength(double pistonVolume, double pistonArea)
@@ -33,6 +34,7 @@ public class Crankshaft
         double[,] C = new double[,] { { 1, 0 } };
         double[,] D = new double[,] { { 0 } };
         stateSpaceSolver = new StateSpaceSolver(A, B, C, D, dt);
+        stateSpaceSolver.SetState(theta, theta_dot);
     }
 
     public void Dynamics(double inputTorque)
@@ -41,6 +43,7 @@ public class Crankshaft
         theta = stateSpaceSolver.position;
         theta_dot = stateSpaceSolver.velocity;
         theta_ddot = stateSpaceSolver.acceleration;
+        moddedAngle = theta % (4 * Math.PI);
     }
 
 }

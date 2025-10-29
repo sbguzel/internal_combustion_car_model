@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\saidb\\Documents\\GitHub\\car_optimization\\dotnet\\dotnet.csproj": {}
+    "/Users/sbguzel/Documents/GitHub/internal_combustion_car_model/dotnet/dotnet.csproj": {}
   },
   "projects": {
-    "C:\\Users\\saidb\\Documents\\GitHub\\car_optimization\\dotnet\\dotnet.csproj": {
+    "/Users/sbguzel/Documents/GitHub/internal_combustion_car_model/dotnet/dotnet.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\saidb\\Documents\\GitHub\\car_optimization\\dotnet\\dotnet.csproj",
+        "projectUniqueName": "/Users/sbguzel/Documents/GitHub/internal_combustion_car_model/dotnet/dotnet.csproj",
         "projectName": "dotnet",
-        "projectPath": "C:\\Users\\saidb\\Documents\\GitHub\\car_optimization\\dotnet\\dotnet.csproj",
-        "packagesPath": "C:\\Users\\saidb\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\saidb\\Documents\\GitHub\\car_optimization\\dotnet\\obj\\",
+        "projectPath": "/Users/sbguzel/Documents/GitHub/internal_combustion_car_model/dotnet/dotnet.csproj",
+        "packagesPath": "/Users/sbguzel/.nuget/packages/",
+        "outputPath": "/Users/sbguzel/Documents/GitHub/internal_combustion_car_model/dotnet/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\saidb\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/Users/sbguzel/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net7.0"
@@ -32,7 +32,13 @@
           "warnAsError": [
             "NU1605"
           ]
-        }
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net7.0": {
@@ -48,12 +54,26 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[7.0.20, 7.0.20]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.osx-arm64",
+              "version": "[7.0.20, 7.0.20]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[7.0.20, 7.0.20]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/RuntimeIdentifierGraph.json"
         }
       }
     }

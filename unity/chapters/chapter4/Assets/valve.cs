@@ -14,6 +14,7 @@ public class Valve
     public double velocity;
     public double acceleration;
     public double opening;
+    public bool isOpen;
     // Input
     double input_last = preload;
     // Solver
@@ -50,16 +51,19 @@ public class Valve
         velocity = stateSpaceSolver.velocity;
         acceleration = stateSpaceSolver.acceleration;
 
-        if(position < input){
-            stateSpaceSolver.SetState(input, input_dot - (stateSpaceSolver.velocity - input_dot) * collisionEnergyLoss);
-            stateSpaceSolver.UpdateStates(0);
+        if (input - position > 0.0001)
+        {
+            stateSpaceSolver.SetState(input, input_dot * collisionEnergyLoss);
+            //stateSpaceSolver.UpdateStates(0);
             position = stateSpaceSolver.position;
             velocity = stateSpaceSolver.velocity;
             acceleration = stateSpaceSolver.acceleration;
         }
 
-        opening = 2 * Math.PI * (diameter/2) * (position - 0.01);
-
+        opening = Math.PI * diameter * (position - 0.01);
+        if (opening < 0.0001) isOpen = false;
+        else isOpen = true;
+        
         input_last = input;
     }
     

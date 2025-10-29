@@ -1,8 +1,22 @@
 {
   "version": 2,
-  "dgSpecHash": "yvMmBq8oahazFo0bY0AMjVYxfn+QL44/ATgELeFDpPxJ3Z2S4hbeLgc6OLl/ZGML8smy/UxaZJonv1mgtsxGuA==",
+  "dgSpecHash": "wf/rksSNbCM=",
   "success": true,
-  "projectFilePath": "C:\\Users\\saidb\\Documents\\GitHub\\car_optimization\\dotnet\\dotnet.csproj",
-  "expectedPackageFiles": [],
-  "logs": []
+  "projectFilePath": "/Users/sbguzel/Documents/GitHub/internal_combustion_car_model/dotnet/dotnet.csproj",
+  "expectedPackageFiles": [
+    "/Users/sbguzel/.nuget/packages/microsoft.netcore.app.ref/7.0.20/microsoft.netcore.app.ref.7.0.20.nupkg.sha512",
+    "/Users/sbguzel/.nuget/packages/microsoft.aspnetcore.app.ref/7.0.20/microsoft.aspnetcore.app.ref.7.0.20.nupkg.sha512",
+    "/Users/sbguzel/.nuget/packages/microsoft.netcore.app.host.osx-arm64/7.0.20/microsoft.netcore.app.host.osx-arm64.7.0.20.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1900",
+      "level": "Warning",
+      "message": "Error occurred while getting package vulnerability data: Access to the path '/Users/sbguzel/.local/share' is denied.",
+      "projectPath": "/Users/sbguzel/Documents/GitHub/internal_combustion_car_model/dotnet/dotnet.csproj",
+      "warningLevel": 1,
+      "filePath": "/Users/sbguzel/Documents/GitHub/internal_combustion_car_model/dotnet/dotnet.csproj",
+      "targetGraphs": []
+    }
+  ]
 }
